@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تسجيل دخول الإدارة - Yu-Gi-Oh!</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎴</text></svg>">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/admin.css">
+  <link rel="stylesheet" href="../css/auth.css">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script type="module" src="../js/navbar.js"></script>
+</head>
+<body>
+  <header class="main-header">
+    <div class="container header-container">
+      <a href="../index.html" class="logo-link">
+        <img src="../src/assets/images/logo.png" alt="Yu-Gi-Oh! Pharaoh's Edition" class="header-logo">
+      </a>
+      <h1 style="color: var(--gold-bright); margin: 0; font-family: var(--font-heading); flex-grow: 1; text-align: center;"><i class="ph ph-shield"></i> دخول الإدارة</h1>
+      <nav class="main-nav">
+        <a href="../index.html"><i class="ph ph-house"></i> العودة للموقع</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="login-container">
+      <h2>تسجيل دخول الأدمن</h2>
+      <form id="admin-login-form">
+        <div class="form-group">
+          <label for="email">البريد الإلكتروني:</label>
+          <input type="email" id="email" required>
+        </div>
+        <div class="form-group">
+          <label for="password">كلمة المرور:</label>
+          <input type="password" id="password" required>
+        </div>
+        <button type="submit">دخول</button>
+        <p id="login-error" class="error-msg"></p>
+      </form>
+    </div>
+  </main>
+
+  <script type="module" src="../js/firebase-config.js"></script>
+  <script type="module" src="../js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>شاشة اللعب - Yu-Gi-Oh!</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎴</text></svg>">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/game.css">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  
+  <!-- تعديلات الـ Responsive لضمان ظهور الكروت في الشاشات الصغيرة -->
+  <style>
+    @media screen and (max-width: 768px) {
+      /* تعديل منطقة الأزرار وكروت اليد */
+      .bottom-action-bar {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 10px !important;
+        width: 100% !important;
+        padding: 5px !important;
+        box-sizing: border-box !important;
+      }
+
+      .action-buttons {
+        display: flex !important;
+        justify-content: center !important;
+        gap: 15px !important;
+        width: 100% !important;
+      }
+
+      /* حاوية الكروت (اليد) لتسمح بالتمرير الأفقي بدلاً من إخفاء الكروت */
+      .hand-tray {
+        width: 100vw !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch !important; /* لدعم التمرير السلس في الايفون */
+        padding: 10px 5px !important;
+      }
+
+      #hand-container {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        justify-content: flex-start !important;
+        align-items: center !important;
+        gap: 8px !important;
+        min-width: max-content !important; /* منع انكماش الكروت */
+        padding: 0 15px !important;
+      }
+
+      /* تصغير الكروت نسبياً لكي تظهر بشكل مناسب على الهاتف */
+      #hand-container > div,
+      #hand-container .card {
+        flex: 0 0 auto !important;
+        width: 75px !important; 
+        height: 110px !important;
+      }
+
+      /* تصغير منطقة المجموعة والمقبرة لتوفير مساحة */
+      .play-area {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-evenly !important;
+        align-items: center !important;
+        width: 100% !important;
+        padding: 10px 0 !important;
+        gap: 10px !important;
+      }
+
+      .deck-zone, .graveyard-zone {
+        transform: scale(0.85) !important;
+      }
+
+      /* إخفاء شريط التمرير (Scrollbar) لشكل جمالي أفضل على الهاتف */
+      .hand-tray::-webkit-scrollbar {
+        height: 6px;
+      }
+      .hand-tray::-webkit-scrollbar-thumb {
+        background-color: var(--accent-gold, #cda434);
+        border-radius: 10px;
+      }
+    }
+  </style>
+  <script type="module" src="js/navbar.js"></script>
+</head>
+<body class="game-page">
+  <header class="main-header game-side-header">
+    <div class="header-container game-side-container">
+      <a href="index.html" class="logo-link">
+        <img src="public/assets/images/logo.png" alt="Yu-Gi-Oh! Pharaoh's Edition" class="header-logo">
+      </a>
+      <h1 class="game-page-title">شاشة اللعب</h1>
+      <button id="new-game-btn" class="login-link new-game-side-btn">
+        <i class="ph ph-arrows-clockwise"></i> لعبة جديدة
+      </button>
+    </div>
+  </header>
+
+  <main class="game-board">
+    
+    <div id="start-overlay" class="start-overlay" style="display: none;">
+      <!-- Hidden overlay -->
+    </div>
+
+    <!-- Dueling Field Container -->
+    <div class="dueling-field">
+      
+      <!-- Left Column: Graveyard -->
+      <div class="field-column side-column left-side">
+        <div class="zone-badge">
+          <i class="ph ph-crown"></i> المقبرة <i class="ph ph-crown"></i>
+        </div>
+        <div class="graveyard-zone">
+          <div class="count-badge"><span id="grave-count-display">0</span> كارت</div>
+          <div id="graveyard-pile" class="field-slot graveyard-slot empty">
+            <div class="sarcophagus-icon">⚰️</div>
+          </div>
+          <button id="view-graveyard-btn" style="display: none;">عرض المقبرة</button>
+        </div>
+      </div>
+
+      <!-- Center Column: Monster Zone & Spell/Trap Zone -->
+      <div class="field-column center-column">
+        
+        <!-- Monster Zone -->
+        <div class="field-zone-container">
+          <div class="zone-header-banner">
+            <span class="wing-icon left"><i class="ph ph-sparkle"></i></span>
+            <span class="zone-title">منطقة الوحوش</span>
+            <span class="wing-icon right"><i class="ph ph-sparkle"></i></span>
+          </div>
+          <div class="slots-row monster-row" id="monster-zone">
+            <div class="field-slot monster-slot" data-zone="monster" data-index="0"></div>
+            <div class="field-slot monster-slot" data-zone="monster" data-index="1"></div>
+            <div class="field-slot monster-slot" data-zone="monster" data-index="2"></div>
+            <div class="field-slot monster-slot" data-zone="monster" data-index="3"></div>
+            <div class="field-slot monster-slot" data-zone="monster" data-index="4"></div>
+          </div>
+        </div>
+
+        <!-- Spell & Trap Zone -->
+        <div class="field-zone-container">
+          <div class="zone-header-banner">
+            <span class="wing-icon left"><i class="ph ph-ankh"></i></span>
+            <span class="zone-title">منطقة السحر والفخ</span>
+            <span class="wing-icon right"><i class="ph ph-ankh"></i></span>
+          </div>
+          <div class="slots-row spell-row" id="spell-zone">
+            <div class="field-slot spell-slot" data-zone="spell" data-index="0"></div>
+            <div class="field-slot spell-slot" data-zone="spell" data-index="1"></div>
+            <div class="field-slot spell-slot" data-zone="spell" data-index="2"></div>
+            <div class="field-slot spell-slot" data-zone="spell" data-index="3"></div>
+            <div class="field-slot spell-slot" data-zone="spell" data-index="4"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Deck -->
+      <div class="field-column side-column right-side">
+        <div class="zone-badge">
+          <i class="ph ph-crown"></i> مجموعة الأوراق <i class="ph ph-crown"></i>
+        </div>
+        <div class="deck-zone">
+          <div class="count-badge"><span id="deck-count-display">0</span> كارت</div>
+          <div id="deck-pile" class="field-slot deck-slot empty"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Section: Hand Tray and Controls -->
+    <div class="hand-section-tray">
+      <div class="zone-header-banner hand-banner">
+        <span class="wing-icon left"><i class="ph ph-cards"></i></span>
+        <span class="zone-title">الأوراق في اليد</span>
+        <span class="wing-icon right"><i class="ph ph-cards"></i></span>
+      </div>
+      <div class="hand-inner-wrapper">
+        <div class="action-buttons">
+          <button id="shuffle-start-btn" class="action-btn"><i class="ph ph-shuffle"></i> خلط ولعب</button>
+          <button id="draw-card-btn" class="action-btn" disabled><i class="ph ph-plus-circle"></i> سحب كارت</button>
+          <button id="toggle-hand-btn" class="action-btn"><i class="ph ph-eye-slash"></i> إخفاء اليد</button>
+        </div>
+        <div class="hand-tray">
+          <div id="hand-container"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Graveyard Popover Box (Emerging from Graveyard stack on the left) -->
+  <div id="graveyard-popover" class="graveyard-popover">
+    <div class="popover-header">
+      <h3><i class="ph ph-skull"></i> المقبرة</h3>
+      <span class="popover-close-btn" id="close-modal-btn">&times;</span>
+    </div>
+    <div id="graveyard-list" class="graveyard-grid"></div>
+  </div>
+
+  <!-- Deck Popover Box (Emerging from Deck stack on the right) -->
+  <div id="deck-popover" class="deck-popover">
+    <div class="popover-header">
+      <h3><i class="ph ph-cards"></i> مجموعة الأوراق</h3>
+      <span class="popover-close-btn" id="close-deck-modal-btn">&times;</span>
+    </div>
+    <div id="deck-list" class="graveyard-grid"></div>
+  </div>
+
+  <div id="card-details-modal" class="modal">
+    <div class="modal-content card-details-content">
+      <span class="close-btn" id="close-details-btn">&times;</span>
+      <div id="card-details-body"></div>
+    </div>
+  </div>
+
+  <!-- Hand Card Context Menu -->
+  <div id="context-menu" class="context-menu">
+    <button id="ctx-view-details"><i class="ph ph-eye"></i> معاينة</button>
+    <button id="ctx-summon-atk"><i class="ph ph-sword"></i> استدعاء هجوم</button>
+    <button id="ctx-summon-def"><i class="ph ph-shield"></i> استدعاء دفاع</button>
+    <button id="ctx-set-def"><i class="ph ph-cards"></i> تعيين مقلوب</button>
+    <button id="ctx-activate-spell"><i class="ph ph-lightning"></i> تفعيل</button>
+    <button id="ctx-set-spell"><i class="ph ph-cards"></i> تعيين مقلوب</button>
+    <button id="ctx-send-grave"><i class="ph ph-skull"></i> إلى المقبرة</button>
+  </div>
+
+  <!-- Field Card Context Menu -->
+  <div id="field-context-menu" class="context-menu">
+    <button id="ctx-field-view-details"><i class="ph ph-eye"></i> معاينة</button>
+    <button id="ctx-field-flip-change"><i class="ph ph-arrows-clockwise"></i> تغيير الوضع / كشف</button>
+    <button id="ctx-field-to-grave"><i class="ph ph-skull"></i> إلى المقبرة</button>
+    <button id="ctx-field-to-hand"><i class="ph ph-arrow-u-down-left"></i> إرجاع لليد</button>
+  </div>
+
+  <!-- Graveyard Card Context Menu -->
+  <div id="grave-context-menu" class="context-menu">
+    <button id="ctx-grave-view-details"><i class="ph ph-eye"></i> معاينة</button>
+    <button id="ctx-grave-to-hand"><i class="ph ph-arrow-u-down-left"></i> إلى اليد</button>
+  </div>
+
+  <!-- Deck Card Context Menu -->
+  <div id="deck-context-menu" class="context-menu">
+    <button id="ctx-deck-view-details"><i class="ph ph-eye"></i> معاينة</button>
+    <button id="ctx-deck-to-hand"><i class="ph ph-arrow-u-down-left"></i> إلى اليد</button>
+    <button id="ctx-deck-to-grave"><i class="ph ph-skull"></i> إلى المقبرة</button>
+  </div>
+
+  <script type="module" src="js/firebase-config.js"></script>
+  <script type="module" src="js/game.js"></script>
+</body>
+</html>

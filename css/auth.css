@@ -1,0 +1,104 @@
+/* Auth styles */
+#auth-modal .modal-content,
+.login-container {
+  background: var(--bg-panel);
+  border: 1px solid var(--gold-primary);
+  clip-path: polygon(
+    16px 0, 100% 0, 100% calc(100% - 16px),
+    calc(100% - 16px) 100%, 0 100%, 0 16px
+  );
+  padding: 30px;
+  position: relative;
+  max-width: 400px;
+  margin: 40px auto;
+}
+
+#auth-modal h2,
+.login-container h2 {
+  font-family: var(--font-heading);
+  color: var(--gold-bright);
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 2rem;
+}
+
+#auth-form input,
+.login-container input {
+  background: var(--bg-void);
+  border: 1px solid var(--gold-primary);
+  color: var(--text-cream);
+  padding: 12px;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 15px;
+  outline: none;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+#auth-form input:focus,
+.login-container input:focus {
+  border-color: var(--gold-bright);
+  box-shadow: 0 0 10px rgba(245, 213, 115, 0.5);
+}
+
+#auth-form label,
+.login-container label {
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  display: block;
+  margin-bottom: 5px;
+}
+
+#close-auth-modal {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  color: var(--gold-primary);
+  font-size: 24px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+#close-auth-modal:hover {
+  color: var(--gold-bright);
+}
+
+#auth-login-btn,
+#auth-register-btn,
+.login-container button[type="submit"] {
+  background: linear-gradient(135deg, var(--gold-bright), var(--gold-primary), #cc9900);
+  color: var(--bg-void);
+  border: none;
+  padding: 12px;
+  font-family: var(--font-body);
+  font-weight: bold;
+  cursor: pointer;
+  clip-path: polygon(
+    10px 0, 100% 0, 100% calc(100% - 10px),
+    calc(100% - 10px) 100%, 0 100%, 0 10px
+  );
+  transition: transform 0.2s ease, filter 0.2s ease;
+  width: 100%;
+  margin-top: 10px;
+}
+
+#auth-login-btn:hover,
+#auth-register-btn:hover,
+.login-container button[type="submit"]:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+/* Secondary style for register button to differentiate */
+#auth-register-btn {
+  background: transparent;
+  color: var(--gold-primary);
+  border: 1px solid var(--gold-primary);
+  clip-path: none;
+}
+
+#auth-register-btn:hover {
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--gold-bright);
+}

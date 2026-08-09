@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Cinzel:wght@400;600;700&family=Reem+Kufi:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Pallete: Royal Egyptian Theme */
+  --deep-charcoal: #12100e; /* خلفية عميقة ودافئة بدلاً من الأسود الصريح */
+  --panel-grey: #1e1b19;    /* لون الألواح */
+  --royal-gold: #d4af37;    /* ذهبي كلاسيكي (فخم وغير فاقع) */
+  --warm-gold: #e5c158;     /* درجة أفتح للـ Highlights */
+  --parchment: #e0d0b0;     /* لون أقرب للورق القديم للنصوص */
+  --muted-grey: #a19584;    /* للنصوص الثانوية (مريحة للعين) */
+  --regal-crimson: #a63a3a; /* أحمر داكن للأخطاء/الإلغاء (بدل الأحمر النيون) */
+
+  /* Theme Mapping */
+  --bg-void: var(--deep-charcoal);
+  --bg-panel: var(--panel-grey);
+  --gold-primary: var(--royal-gold);
+  --gold-bright: var(--warm-gold);
+  --violet-glow: var(--royal-gold); 
+  --text-cream: var(--parchment);
+  --text-muted: var(--muted-grey);
+
+  /* Legacy mapping */
+  --bg-obsidian: var(--bg-void);
+  --ink-parchment: var(--text-cream);
+  --ink-faded: var(--text-muted);
+  --accent-gold: var(--gold-primary);
+  --accent-ember: var(--warm-gold);
+  --accent-emerald: var(--royal-gold);
+  --accent-wine: var(--regal-crimson);
+
+  /* Typography */
+  --font-heading: 'Reem Kufi', sans-serif;
+  --font-body: 'Cairo', sans-serif;
+  --font-accent: 'Cinzel', serif;
+
+  /* Typographic Scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+
+  /* Spacing Scale */
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-48: 48px;
+  --space-64: 64px;
+
+  /* Border Radius */
+  --radius-structural: 4px;
+  --radius-interactive: 8px;
+  --radius-interactive-lg: 12px;
+
+  /* Shadows - More subtle */
+  --shadow-glow: 0 4px 12px rgba(212, 175, 55, 0.1);
+  --shadow-glow-hover: 0 8px 20px rgba(212, 175, 55, 0.15);
+
+  /* Transitions */
+  --transition-fast: 0.1s ease-out;
+  --transition-base: 0.25s ease-out;
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Yu-Gi-Oh! Digital Companion",
+  "description": "A digital companion for playing Yu-Gi-Oh! locally, managing the library, deck building, and gameplay state like hand and graveyard using local storage.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم - Yu-Gi-Oh!</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎴</text></svg>">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/admin.css">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script type="module" src="../js/navbar.js"></script>
+</head>
+<body>
+  <header class="main-header">
+    <div class="container header-container">
+      <a href="../index.html" class="logo-link">
+        <img src="../src/assets/images/logo.png" alt="Yu-Gi-Oh! Pharaoh's Edition" class="header-logo">
+      </a>
+      <h1 style="color: var(--gold-bright); margin: 0; font-family: var(--font-heading);"><i class="ph ph-shield-check"></i> لوحة التحكم</h1>
+      <nav class="main-nav">
+        <a href="../index.html"><i class="ph ph-house"></i> عرض الموقع</a>
+        <button id="logout-btn" class="login-link" style="background: transparent; border: none; font-size: 16px; cursor: pointer; color: var(--text-cream);"><i class="ph ph-sign-out"></i> تسجيل الخروج</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="admin-profile">
+      <h2>حسابي</h2>
+      <div id="profile-details" class="profile-card">
+        <p class="loading-text">جاري تحميل البيانات...</p>
+      </div>
+    </section>
+
+    <!-- Statistics -->
+    <section id="dashboard-stats">
+      <h2>الإحصائيات</h2>
+      <div class="stats-grid">
+        <div class="stat-card">إجمالي الكروت: <span id="stat-total">0</span></div>
+        <div class="stat-card type-monster">وحوش: <span id="stat-monster">0</span></div>
+        <div class="stat-card type-spell">سحر: <span id="stat-spell">0</span></div>
+        <div class="stat-card type-trap">فخ: <span id="stat-trap">0</span></div>
+      </div>
+    </section>
+
+    <section id="manage-cards">
+      <div class="header-actions">
+        <h2>إدارة الكروت</h2>
+        <button id="open-add-modal-btn" class="add-btn">إضافة كارت جديد</button>
+        <button id="open-bulk-add-modal-btn" class="add-btn" style="background-color: var(--accent-wine); margin-right: var(--space-8);">إضافة متعددة</button>
+      </div>
+      <div class="controls">
+        <input type="text" id="admin-search-input" placeholder="ابحث باسم الكارت...">
+      </div>
+      <div class="admin-cards-grid" id="admin-cards-container">
+        <!-- Cards will be rendered here -->
+      </div>
+    </section>
+    
+    <section id="activity-logs">
+      <h2>سجل النشاطات</h2>
+      <div class="controls filter-controls">
+        <select id="log-action-filter" class="filter-select">
+          <option value="">كل العمليات</option>
+          <option value="login">تسجيل الدخول</option>
+          <option value="add_card">إضافة كارت</option>
+          <option value="edit_card">تعديل كارت</option>
+          <option value="delete_card">حذف كارت</option>
+        </select>
+        <select id="log-admin-filter" class="filter-select">
+          <option value="">كل المديرين</option>
+          <!-- Will be populated dynamically for superadmins -->
+        </select>
+      </div>
+      <div id="logs-container" class="logs-list">
+        <p class="loading-text">جاري تحميل السجل...</p>
+      </div>
+    </section>
+  </main>
+
+
+  <!-- Bulk Add Modal -->
+  <div id="bulk-add-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" id="close-bulk-modal-btn">&times;</span>
+      <h2>إضافة كروت متعددة</h2>
+      <form id="bulk-add-form">
+        <div class="form-group">
+          <label>أسماء الكروت بالإنجليزية (كل كارت في سطر جديد)</label>
+          <textarea id="bulk-card-names" rows="10" class="english-text ltr-input form-textarea" placeholder="Dark Magician&#10;Blue-Eyes White Dragon" required></textarea>
+        </div>
+        <div id="bulk-add-progress" style="display:none; margin-bottom: 15px;">
+          <p style="margin-bottom: 5px;">جاري الإضافة: <span id="bulk-current-progress">0</span> / <span id="bulk-total-progress">0</span></p>
+          <p id="bulk-error-log" style="color: var(--accent-wine); font-size: var(--text-sm); white-space: pre-line; max-height: 100px; overflow-y: auto;"></p>
+        </div>
+        <button type="submit" id="start-bulk-add-btn">بدء الإضافة</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add/Edit Card Modal -->
+  <div id="card-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" id="close-card-modal-btn">&times;</span>
+      <h2 id="card-modal-title">إضافة كارت جديد</h2>
+      <form id="card-form">
+        <input type="hidden" id="card-id">
+        <div class="form-group">
+          <label>اسم الكارت *</label>
+          <div style="display: flex; gap: 10px;"><input type="text" id="card-name" class="english-text ltr-input" style="flex: 1;" required><button type="button" id="auto-fetch-btn" class="btn-secondary" style="white-space: nowrap;">جلب البيانات</button></div><small style="color: var(--ink-faded); margin-top: var(--space-4); display: block;">اكتب اسم الكارت بالإنجليزية واضغط "جلب البيانات" لتعبئة الحقول من YGOPRODeck تلقائياً.</small>
+        </div>
+        <div class="form-group">
+          <label>رابط الصورة *</label>
+          <input type="url" id="card-image" class="ltr-input" required>
+        </div>
+        <div class="form-group">
+          <label>النوع *</label>
+          <select id="card-type" required>
+            <option value="Monster">وحش (Monster)</option>
+            <option value="Spell">سحر (Spell)</option>
+            <option value="Trap">فخ (Trap)</option>
+          </select>
+        </div>
+        
+        <div id="monster-fields">
+          <div class="form-group">
+            <label>السمة (Attribute)</label>
+            <select id="card-attribute">
+              <option value="">--اختر--</option>
+              <option value="DARK">DARK</option>
+              <option value="LIGHT">LIGHT</option>
+              <option value="EARTH">EARTH</option>
+              <option value="WATER">WATER</option>
+              <option value="FIRE">FIRE</option>
+              <option value="WIND">WIND</option>
+              <option value="DIVINE">DIVINE</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>المستوى (Level)</label>
+            <input type="number" id="card-level" min="1" max="12">
+          </div>
+          <div class="form-group">
+            <label>الهجوم (ATK)</label>
+            <input type="number" id="card-atk" min="0">
+          </div>
+          <div class="form-group">
+            <label>الدفاع (DEF)</label>
+            <input type="number" id="card-def" min="0">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>الوصف *</label>
+          <textarea id="card-description" rows="4" class="form-textarea" required></textarea>
+        </div>
+        
+        <button type="submit" id="save-card-btn">حفظ الكارت</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div id="delete-modal" class="modal">
+    <div class="modal-content small-center">
+      <h2>تأكيد الحذف</h2>
+      <p>هل أنت متأكد أنك تريد حذف هذا الكارت؟ لا يمكن التراجع عن هذا الإجراء.</p>
+      <div class="modal-actions">
+        <button id="confirm-delete-btn" class="btn-danger">حذف</button>
+        <button id="cancel-delete-btn" class="btn-secondary">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="../js/firebase-config.js"></script>
+  <script type="module" src="../js/auth.js"></script>
+  <script type="module" src="../js/activity-log.js"></script>
+  <script type="module" src="../js/admin-dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,486 @@
+@import "design-tokens.css";
+
+:root {
+  --bg-color: var(--bg-obsidian);
+  --surface-color: var(--bg-panel);
+  --primary-color: var(--accent-gold);
+  --secondary-color: var(--accent-ember);
+  --text-primary: var(--ink-parchment);
+  --text-secondary: var(--ink-faded);
+  --font-arabic: var(--font-body);
+  --font-english: var(--font-heading);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-void);
+  background-image: 
+    linear-gradient(to top, var(--bg-void) 0%, rgba(32, 32, 32, 0.7) 40%, rgba(32, 32, 32, 0.2) 100%),
+    url('../public/assets/images/bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: var(--text-primary);
+  font-family: var(--font-arabic);
+  direction: rtl;
+  padding-top: 100px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--primary-color);
+  margin-top: 0;
+  font-family: var(--font-heading);
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: #fff;
+}
+
+
+/* =========================================
+   زر الهمبرغر العائم
+========================================= */
+.floating-hamburger {
+  position: fixed;
+  top: 20px;
+  right: 20px; /* موجود في اليمين لأن الموقع عربي (RTL) */
+  width: 50px;
+  height: 50px;
+  background: rgba(22, 16, 12, 0.85); /* خلفية داكنة تناسب الموقع */
+  border: 1px solid var(--gold-primary);
+  color: var(--gold-primary);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  cursor: pointer;
+  z-index: 1100;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+  clip-path: none; /* لإلغاء القص المائل الافتراضي للأزرار في موقعك */
+  padding: 0;
+}
+
+.floating-hamburger:hover {
+  background: rgba(255, 209, 0, 0.15);
+  color: var(--gold-bright);
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(255, 209, 0, 0.3);
+}
+
+/* تعديل المسافة العلوية للصفحة بعد إزالة النافبار */
+body {
+  padding-top: 60px; /* تم تقليلها لأن النافبار اختفى */
+}
+
+@media (max-width: 768px) {
+  body {
+    padding-top: 60px;
+  }
+  .floating-hamburger {
+    top: 15px;
+    right: 15px;
+    width: 45px;
+    height: 45px;
+    font-size: 24px;
+  }
+}
+
+.hamburger-btn:hover {
+  transform: scale(1.1);
+  color: var(--gold-bright);
+}
+
+/* =========================================
+   الطبقة الضبابية (Overlay)
+========================================= */
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px); /* التأثير الضبابي */
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1500;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.menu-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* =========================================
+   القائمة الجانبية (Side Menu)
+========================================= */
+.side-menu {
+  position: fixed;
+  top: 0;
+  right: -320px; /* مخفية لليمين */
+  width: 300px;
+  max-width: 85vw;
+  height: 100vh;
+  background: rgba(22, 16, 12, 0.98);
+  border-left: 2px solid var(--gold-primary);
+  box-shadow: -5px 0 25px rgba(0, 0, 0, 0.8);
+  z-index: 1600;
+  transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.side-menu.active {
+  right: 0;
+}
+
+.side-menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 209, 0, 0.2);
+}
+
+.side-logo {
+  height: 45px;
+}
+
+.close-menu-btn {
+  background: transparent;
+  color: var(--gold-primary);
+  border: none;
+  font-size: 32px;
+  cursor: pointer;
+  clip-path: none;
+  padding: 0;
+  line-height: 1;
+}
+
+.close-menu-btn:hover {
+  color: var(--accent-wine);
+  transform: rotate(90deg);
+}
+
+/* مربع البحث الجانبي */
+.side-search {
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--gold-primary);
+  border-radius: 10px;
+  padding: 10px 15px;
+  margin: 20px;
+}
+
+.side-search input {
+  background: transparent;
+  border: none;
+  color: var(--text-cream);
+  font-family: var(--font-arabic);
+  outline: none;
+  width: 100%;
+}
+
+.side-search input::placeholder {
+  color: var(--text-muted);
+}
+
+.side-search .search-icon {
+  color: var(--gold-primary);
+}
+
+/* روابط القائمة */
+.side-menu-links {
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px 20px 20px;
+  gap: 15px;
+}
+
+.side-menu-links a,
+.side-menu-links .side-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-cream);
+  font-family: var(--font-heading);
+  font-size: 18px;
+  padding: 12px 15px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: right;
+  width: 100%;
+}
+
+.side-menu-links i {
+  font-size: 24px;
+  color: var(--gold-primary);
+}
+
+.side-menu-links a:hover,
+.side-menu-links a.active,
+.side-menu-links .side-logout-btn:hover {
+  background: rgba(255, 209, 0, 0.1);
+  color: var(--gold-bright);
+}
+
+.side-divider {
+  height: 1px;
+  background: rgba(255, 209, 0, 0.2);
+  margin: 10px 0;
+}
+
+.user-welcome-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255, 209, 0, 0.1);
+}
+
+/* =========================================
+   الأزرار العامة وباقي التنسيقات (محتفظ بها)
+========================================= */
+button {
+  background: linear-gradient(135deg, var(--gold-bright), var(--gold-primary), #cc9900);
+  color: var(--bg-void);
+  border: none;
+  padding: 10px 20px;
+  font-family: var(--font-arabic);
+  font-weight: 700;
+  cursor: pointer;
+  clip-path: polygon(
+    12px 0, 100% 0, 100% calc(100% - 12px),
+    calc(100% - 12px) 100%, 0 100%, 0 12px
+  );
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--gold-primary);
+  border: 1px solid var(--gold-primary);
+  clip-path: none;
+  border-radius: 4px;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--gold-bright);
+}
+
+.hieroglyph-border {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  writing-mode: vertical-rl;
+  font-size: 22px;
+  color: var(--gold-primary);
+  opacity: 0.15;
+  letter-spacing: 8px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.hieroglyph-border::after {
+  content: "𓂀𓆣𓊹𓉐𓋹𓎡𓂀𓆣𓊹𓉐𓋹𓎡";
+}
+
+.hieroglyph-border.left {
+  left: 10px;
+}
+
+.hieroglyph-border.right {
+  right: 10px;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.english-text {
+  font-family: var(--font-english);
+  direction: ltr;
+  display: inline-block;
+}
+
+@media (max-width: 1024px) {
+  .hieroglyph-border {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    padding-top: 90px;
+  }
+  .main-header {
+    width: 98%;
+    padding: 8px 12px;
+    margin-top: 6px;
+    border-radius: 14px;
+  }
+  .header-logo {
+    height: 40px;
+  }
+  .container {
+    padding: 12px;
+  }
+}
+
+/* Modal styles */
+.modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000; /* تم زيادة الزي اندكس ليكون فوق القائمة الجانبية */
+}
+
+.modal-content {
+  background: var(--surface-color);
+  padding: 20px;
+  border: 1px solid var(--primary-color);
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.close-btn {
+  float: left;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--primary-color);
+}
+
+@keyframes staggerFadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+body > header {
+  animation: staggerFadeUp 0.4s ease-out forwards;
+}
+
+body > main {
+  opacity: 0;
+  animation: staggerFadeUp 0.4s ease-out 0.1s forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Global Mobile Rules (Phase 6 Audit) */
+@media (max-width: 768px) {
+  :root {
+    --text-xs: 0.875rem;
+  }
+  
+  button, input, select, .admin-card-actions button, .action-btn, .deck-input, .form-group input, .form-group select {
+    min-height: 44px;
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-8);
+  }
+  
+  body, html {
+    overflow-x: hidden;
+  }
+}
+
+/* Card Preview Overlay (Mobile) */
+#mobile-card-preview-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-out;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+#mobile-card-preview-overlay.show {
+  opacity: 1;
+}
+
+#mobile-card-preview-image {
+  max-width: 90vw;
+  max-height: 80vh;
+  border-radius: var(--radius-interactive-lg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(201, 166, 107, 0.3);
+  transform: scale(0.95);
+  transition: transform 0.2s ease-out;
+}
+
+#mobile-card-preview-overlay.show #mobile-card-preview-image {
+  transform: scale(1);
+}
+
+.card-image, .edit-card-image, #replace-cards-container img {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  pointer-events: none;
+}
+
+.hand-card, .grave-item {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  pointer-events: auto;
+}
