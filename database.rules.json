@@ -93,11 +93,17 @@
     "notifications": {
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && auth.uid === $uid",
         "$notifId": {
           ".read": "auth != null && auth.uid === $uid",
-          ".write": "auth != null && (auth.uid === $uid || (!data.exists() && newData.exists()))"
+          ".write": "auth != null && (auth.uid === $uid || !data.exists())"
         }
+      }
+    },
+
+    "chats": {
+      "$chatId": {
+        ".read": "auth != null",
+        ".write": "auth != null"
       }
     },
 

@@ -252,6 +252,162 @@
       padding: 40px;
       font-size: 1.1rem;
     }
+
+    /* Chat Modal Styles */
+    .chat-modal-content {
+      background: rgba(22, 16, 12, 0.95);
+      border: 1px solid var(--gold-primary);
+      border-radius: 12px;
+      width: 95%;
+      max-width: 520px;
+      height: 550px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.85);
+      backdrop-filter: blur(12px);
+      overflow: hidden;
+      margin: auto;
+    }
+
+    .chat-header {
+      padding: 14px 18px;
+      background: rgba(10, 6, 4, 0.85);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chat-friend-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chat-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid var(--gold-primary);
+      object-fit: cover;
+    }
+
+    .chat-friend-name {
+      margin: 0;
+      color: var(--gold-primary);
+      font-size: 1.05rem;
+      font-weight: bold;
+    }
+
+    .chat-friend-status {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 2px;
+    }
+
+    .close-chat-btn {
+      background: transparent;
+      border: none;
+      color: var(--gold-primary);
+      font-size: 28px;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+
+    .close-chat-btn:hover {
+      color: var(--gold-bright);
+    }
+
+    .chat-messages-container {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: rgba(10, 6, 4, 0.4);
+    }
+
+    .chat-message-item {
+      max-width: 78%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      word-wrap: break-word;
+      position: relative;
+    }
+
+    .chat-message-item.sent {
+      align-self: flex-start;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(184, 134, 11, 0.2));
+      color: #ffffff;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      border-bottom-right-radius: 2px;
+    }
+
+    .chat-message-item.received {
+      align-self: flex-end;
+      background: rgba(40, 30, 22, 0.85);
+      color: #e0e0e0;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-bottom-left-radius: 2px;
+    }
+
+    .chat-message-time {
+      display: block;
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.5);
+      margin-top: 4px;
+      text-align: left;
+    }
+
+    .chat-input-area {
+      padding: 12px 16px;
+      background: rgba(10, 6, 4, 0.85);
+      border-top: 1px solid rgba(212, 175, 55, 0.2);
+      display: flex;
+      gap: 10px;
+    }
+
+    .chat-input-area input {
+      flex: 1;
+      background: rgba(18, 18, 18, 0.85);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 8px;
+      color: #fff;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      outline: none;
+      font-family: var(--font-arabic);
+    }
+
+    .chat-input-area input:focus {
+      border-color: var(--gold-primary);
+    }
+
+    .chat-send-btn {
+      background: var(--gold-primary);
+      color: var(--bg-void);
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s, transform 0.2s;
+      font-family: var(--font-arabic);
+    }
+
+    .chat-send-btn:hover {
+      background: var(--gold-bright);
+      transform: translateY(-1px);
+    }
   </style>
 </head>
 <body>
@@ -348,6 +504,33 @@
       <div id="search-results-container" class="user-grid"></div>
     </div>
   </main>
+
+  <!-- نافذة محادثة الأصدقاء -->
+  <div id="friend-chat-modal" class="modal" style="z-index: 3000;">
+    <div class="chat-modal-content">
+      <div class="chat-header">
+        <div class="chat-friend-info">
+          <img id="chat-friend-avatar" src="" alt="avatar" class="chat-avatar">
+          <div>
+            <h3 id="chat-friend-name" class="chat-friend-name">اسم الصديق</h3>
+            <span id="chat-friend-status" class="chat-friend-status">جاري التحقق...</span>
+          </div>
+        </div>
+        <button id="close-chat-modal" class="close-chat-btn">&times;</button>
+      </div>
+
+      <div id="chat-messages-container" class="chat-messages-container">
+        <!-- Messages loaded dynamically -->
+      </div>
+
+      <div class="chat-input-area">
+        <input type="text" id="chat-message-input" placeholder="اكتب رسالتك هنا..." autocomplete="off">
+        <button id="chat-send-btn" class="chat-send-btn">
+          <i class="ph ph-paper-plane-right"></i> إرسال
+        </button>
+      </div>
+    </div>
+  </div>
 
   <script type="module" src="js/firebase-config.js"></script>
   <script type="module" src="js/friends.js"></script>

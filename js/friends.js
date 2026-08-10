@@ -22,14 +22,28 @@ const searchResultsContainer = document.getElementById('searchResultsContainer')
 const userSearchInput = document.getElementById('user-search-input');
 const userSearchBtn = document.getElementById('user-search-btn');
 
+// Chat Modal DOM
+const friendChatModal = document.getElementById('friend-chat-modal');
+const chatFriendAvatar = document.getElementById('chat-friend-avatar');
+const chatFriendName = document.getElementById('chat-friend-name');
+const chatFriendStatus = document.getElementById('chat-friend-status');
+const closeChatModal = document.getElementById('close-chat-modal');
+const chatMessagesContainer = document.getElementById('chat-messages-container');
+const chatMessageInput = document.getElementById('chat-message-input');
+const chatSendBtn = document.getElementById('chat-send-btn');
+
 let currentUser = null;
 let currentProfile = {};
 let myFriends = {};
 let myIncomingRequests = {};
 let myOutgoingRequests = {};
 
+let activeChatFriendUid = null;
+let activeChatUnsubscribe = null;
+
 function init() {
   setupTabs();
+  setupChatEvents();
 
   onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -141,8 +155,11 @@ function listenToFriends() {
           <p class="user-bio">${bio}</p>
         </div>
         <div class="card-actions">
+          <button class="btn-action btn-primary open-chat-btn" data-uid="${friendUid}">
+            <i class="ph ph-chat-circle-dots"></i> محادثة
+          </button>
           <button class="btn-action btn-danger remove-friend-btn" data-uid="${friendUid}">
-            <i class="ph ph-user-minus"></i> إزالة صديق
+            <i class="ph ph-user-minus"></i> إزالة
           </button>
         </div>
       `;
@@ -167,6 +184,11 @@ function listenToFriends() {
           }
         }
       });
+
+      const openChatBtn = cardEl.querySelector('.open-chat-btn');
+      if (openChatBtn) {
+        openChatBtn.addEventListener('click', () => openChatModal(friendUid, name, avatar));
+      }
 
       const removeBtn = cardEl.querySelector('.remove-friend-btn');
       removeBtn.addEventListener('click', () => removeFriend(friendUid, name));
@@ -517,6 +539,157 @@ async function sendFriendRequest(targetUid, targetName, targetAvatar) {
     console.error("Error sending friend request:", err);
     alert("حدث خطأ أثناء إرسال طلب الصداقة.");
   }
+}
+
+// 10. Chat Event Setup & Realtime Messaging
+function setupChatEvents() {
+  if (closeChatModal) {
+    closeChatModal.addEventListener('click', closeChat);
+  }
+  if (friendChatModal) {
+    friendChatModal.addEventListener('click', (e) => {
+      if (e.target === friendChatModal) closeChat();
+    });
+  }
+  if (chatSendBtn) {
+    chatSendBtn.addEventListener('click', sendMessage);
+  }
+  if (chatMessageInput) {
+    chatMessageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+  }
+}
+
+function openChatModal(friendUid, friendName, friendAvatar) {
+  if (!currentUser) return;
+  activeChatFriendUid = friendUid;
+
+  if (chatFriendAvatar) chatFriendAvatar.src = friendAvatar || ('https://api.dicebear.com/9.x/adventurer/svg?seed=' + friendUid);
+  if (chatFriendName) chatFriendName.textContent = friendName || 'صديق';
+  if (chatFriendStatus) chatFriendStatus.textContent = 'جاري التحقق...';
+
+  // Listen to presence of friend for header
+  listenUserPresence(friendUid, (pData) => {
+    if (!chatFriendStatus) return;
+    if (pData.state === 'online') {
+      chatFriendStatus.textContent = '🟢 متصل الآن';
+      chatFriendStatus.style.color = '#2ecc71';
+    } else {
+      chatFriendStatus.textContent = formatPresence(pData.lastSeen, pData.state);
+      chatFriendStatus.style.color = 'var(--text-muted)';
+    }
+  });
+
+  if (friendChatModal) friendChatModal.style.display = 'flex';
+  if (chatMessageInput) chatMessageInput.focus();
+
+  // Load chat messages
+  const chatId = [currentUser.uid, friendUid].sort().join('_');
+  const messagesRef = ref(db, `chats/${chatId}/messages`);
+
+  if (chatMessagesContainer) {
+    chatMessagesContainer.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 30px;">جاري تحميل المحادثة...</div>';
+  }
+
+  if (activeChatUnsubscribe) {
+    activeChatUnsubscribe();
+  }
+
+  activeChatUnsubscribe = onValue(messagesRef, (snapshot) => {
+    if (!chatMessagesContainer) return;
+    chatMessagesContainer.innerHTML = '';
+
+    if (!snapshot.exists()) {
+      chatMessagesContainer.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 30px;">لا توجد رسائل سابقة. ابدأ المحادثة الآن! 👋</div>';
+      return;
+    }
+
+    const messagesObj = snapshot.val();
+    const messagesList = Object.values(messagesObj).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+    messagesList.forEach(msg => {
+      const msgEl = document.createElement('div');
+      const isSentByMe = msg.senderUid === currentUser.uid;
+      msgEl.className = `chat-message-item ${isSentByMe ? 'sent' : 'received'}`;
+
+      const timeStr = msg.timestamp
+        ? new Date(msg.timestamp).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
+        : '';
+
+      msgEl.innerHTML = `
+        <div>${escapeHtml(msg.text)}</div>
+        <span class="chat-message-time">${timeStr}</span>
+      `;
+      chatMessagesContainer.appendChild(msgEl);
+    });
+
+    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+  });
+}
+
+async function sendMessage() {
+  if (!currentUser || !activeChatFriendUid) return;
+  const text = chatMessageInput.value.trim();
+  if (!text) return;
+
+  const chatId = [currentUser.uid, activeChatFriendUid].sort().join('_');
+  const messagesRef = ref(db, `chats/${chatId}/messages`);
+  const myName = currentProfile.username || currentUser.email.split('@')[0];
+
+  chatMessageInput.value = '';
+
+  try {
+    const newMsgRef = push(messagesRef);
+    await set(newMsgRef, {
+      senderUid: currentUser.uid,
+      senderName: myName,
+      text: text,
+      timestamp: Date.now()
+    });
+
+    // Update last message in chat info
+    await set(ref(db, `chats/${chatId}/lastMessage`), {
+      text: text,
+      senderUid: currentUser.uid,
+      timestamp: Date.now()
+    });
+
+    // Notify friend
+    createNotification(activeChatFriendUid, {
+      type: 'chat_message',
+      title: `رسالة جديدة من ${myName}`,
+      message: text.length > 50 ? text.substring(0, 50) + '...' : text,
+      fromUid: currentUser.uid,
+      fromUsername: myName,
+      fromAvatar: currentProfile.avatarUrl || ''
+    });
+
+  } catch (err) {
+    console.error("Error sending message:", err);
+    alert("حدث خطأ أثناء إرسال الرسالة.");
+  }
+}
+
+function closeChat() {
+  if (friendChatModal) friendChatModal.style.display = 'none';
+  activeChatFriendUid = null;
+  if (activeChatUnsubscribe) {
+    activeChatUnsubscribe();
+    activeChatUnsubscribe = null;
+  }
+}
+
+function escapeHtml(str) {
+  return (str || '')
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 document.addEventListener('DOMContentLoaded', init);
