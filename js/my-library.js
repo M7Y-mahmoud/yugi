@@ -281,9 +281,9 @@ function loadUserDecks() {
           </p>
           ${deck.visibility === 'public' ? '<span style="color:var(--accent-gold);font-size:0.8rem;">[عام]</span>' : '<span style="color:var(--text-muted);font-size:0.8rem;">[خاص]</span>'}
           <div class="deck-actions-btn" style="margin-top: 10px;">
-            <button class="btn-play">لعب</button>
-            <button class="btn-preview">تعديل</button>
-            <button class="btn-delete">حذف</button>
+            <button class="btn-play"><i class="ph ph-play"></i> لعب</button>
+            <button class="btn-preview"><i class="ph ph-note-pencil"></i> تعديل</button>
+            <button class="btn-delete"><i class="ph ph-trash"></i> حذف</button>
           </div>
         `;
         
@@ -307,6 +307,11 @@ function loadUserDecks() {
           currentEditingDeckCards = extractCardList(deck.mainDeck || deck.cards);
            
           editDeckNameHeader.textContent = `تعديل المجموعة: ${deck.name}`;
+          const editDeckNameInput = document.getElementById('edit-deck-name-input');
+          if (editDeckNameInput) {
+            editDeckNameInput.value = deck.name || '';
+          }
+
           const editDeckVisibility = document.getElementById('edit-deck-visibility');
           if (editDeckVisibility) {
             editDeckVisibility.value = deck.visibility || 'private';
@@ -323,16 +328,23 @@ function loadUserDecks() {
               alert("يجب أن تحتوي المجموعة على 40-60 كارت لحفظ التعديلات.");
               return;
             }
+
+            const newName = editDeckNameInput ? editDeckNameInput.value.trim() : '';
+            if (!newName) {
+              alert("يرجى إدخال اسم للمجموعة (لا يمكن ترك الاسم فارغاً).");
+              return;
+            }
             
             try {
               newSaveBtn.disabled = true;
               newSaveBtn.textContent = 'جاري الحفظ...';
+              await set(ref(db, `users/${currentUser.uid}/decks/${currentEditingDeckId}/name`), newName);
               await set(ref(db, `users/${currentUser.uid}/decks/${currentEditingDeckId}/mainDeck`), currentEditingDeckCards);
               const editDeckVisibility = document.getElementById('edit-deck-visibility');
               if (editDeckVisibility) {
                 await set(ref(db, `users/${currentUser.uid}/decks/${currentEditingDeckId}/visibility`), editDeckVisibility.value);
               }
-              alert("تم حفظ التعديلات بنجاح!");
+              alert("تم حفظ التعديلات ونوع المجموعة واسمها بنجاح!");
               editModal.style.display = 'none';
             } catch (err) {
               console.error(err);

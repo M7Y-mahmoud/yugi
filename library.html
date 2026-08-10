@@ -125,6 +125,15 @@
     <div class="modal-content" style="max-width: 900px; padding: 20px; width: 95%;">
       <span class="close-btn" id="close-edit-modal">&times;</span>
       <h2 id="edit-deck-name-header" style="margin-top: 0; color: var(--text-primary);">تعديل المجموعة</h2>
+      
+      <!-- قسم تغيير اسم المجموعة -->
+      <div style="margin-bottom: 15px; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 8px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <label for="edit-deck-name-input" style="color: var(--gold-bright); font-weight: bold; font-size: 0.95rem; white-space: nowrap; display: flex; align-items: center; gap: 6px;">
+          <i class="ph ph-pencil-simple-line" style="font-size: 1.2rem;"></i> اسم المجموعة:
+        </label>
+        <input type="text" id="edit-deck-name-input" placeholder="أدخل اسم المجموعة..." style="flex: 1; min-width: 180px; padding: 8px 12px; background: var(--bg-void); color: var(--gold-bright); border: 1px solid var(--gold-primary); border-radius: 6px; font-size: 1rem; font-family: inherit;">
+      </div>
+
       <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <span class="deck-count-label">عدد الكروت الأساسية: <span id="edit-deck-count">0</span> / 60</span>
         <div style="display: flex; gap: 10px; align-items: center;">
