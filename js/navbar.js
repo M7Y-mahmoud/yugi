@@ -20,6 +20,8 @@ function initNavbar() {
  */
 function ensureTopNavbarExists() {
   if (document.getElementById('top-navbar')) return;
+  // Do not inject top navbar on the game page
+  if (document.body.classList.contains('game-page') || window.location.pathname.includes('game.html')) return;
 
   const navbarHtml = `
     <header id="top-navbar" class="top-navbar">

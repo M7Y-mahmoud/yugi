@@ -6,6 +6,7 @@
   <title>الكروت المفضلة - Yu-Gi-Oh!</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎴</text></svg>">
   <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/library.css">
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <script type="module" src="js/navbar.js"></script>
   <style>
@@ -31,31 +32,21 @@
     .favorites-header h1 i {
       color: var(--accent-wine);
     }
-
-    #favorites-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 20px;
-    }
-    
-    .fav-card {
-      position: relative;
-    }
     
     .fav-btn-card {
       position: absolute;
-      top: 10px;
-      right: 10px;
+      top: 8px;
+      right: 8px;
       background: rgba(0,0,0,0.7);
       border: 1px solid var(--gold-primary);
       border-radius: 50%;
-      width: 40px;
-      height: 40px;
+      width: 32px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #e74c3c;
-      font-size: 20px;
+      font-size: 16px;
       cursor: pointer;
       z-index: 10;
       transition: all 0.2s;
@@ -118,7 +109,7 @@
       جاري تحميل المفضلة...
     </div>
 
-    <div id="favorites-container"></div>
+    <div id="cards-container"></div>
   </main>
 
   <script type="module" src="js/firebase-config.js"></script>

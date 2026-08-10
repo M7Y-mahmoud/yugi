@@ -3,7 +3,7 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { ref, get, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const loadingState = document.getElementById('loading-state');
-const favoritesContainer = document.getElementById('favorites-container');
+const favoritesContainer = document.getElementById('cards-container');
 const favCount = document.getElementById('fav-count');
 
 const userLogoutBtn = document.getElementById('user-logout-btn');
@@ -13,21 +13,21 @@ let currentUser = null;
 let allCardsCache = {};
 
 function init() {
-  // Pre-load all cards (to easily map fav ids to cards without multiple round trips)
+  // Pre-load all cards first
   get(ref(db, 'cards')).then(snap => {
     if (snap.exists()) {
       allCardsCache = snap.val();
     }
-  });
-
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      currentUser = user;
-      if (userWelcome) userWelcome.textContent = `مرحباً، ${user.email}`;
-      loadFavorites();
-    } else {
-      window.location.replace('index.html');
-    }
+    // Set up auth listener AFTER cards are loaded (or if empty)
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        if (userWelcome) userWelcome.textContent = `مرحباً، ${user.email}`;
+        loadFavorites();
+      } else {
+        window.location.replace('index.html');
+      }
+    });
   });
 
   if (userLogoutBtn) {
