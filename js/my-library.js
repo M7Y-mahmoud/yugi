@@ -69,12 +69,46 @@ function init() {
     });
   }
   
+  const editAddMoreBtn = document.getElementById('edit-add-more-btn');
+  if (editAddMoreBtn) {
+    editAddMoreBtn.addEventListener('click', () => {
+      if (currentEditingDeckCards.length >= 60) {
+        alert("المجموعة ممتلئة بالفعل بالحد الأقصى (60/60)!");
+        return;
+      }
+      cardIndexToReplace = -1;
+      replaceSearchInput.value = '';
+      replaceTypeFilter.value = 'all';
+      const replaceTitle = document.getElementById('replace-modal-title');
+      if (replaceTitle) {
+        replaceTitle.textContent = `إضافة بطاقات للمجموعة (${currentEditingDeckCards.length}/60)`;
+      }
+      renderReplaceCards();
+      replaceModal.style.display = 'flex';
+    });
+  }
+  
   replaceSearchInput.addEventListener('input', renderReplaceCards);
   replaceTypeFilter.addEventListener('change', renderReplaceCards);
 }
 
 function updateEditCountUI() {
-  editDeckCount.textContent = currentEditingDeckCards.length;
+  const count = currentEditingDeckCards.length;
+  if (editDeckCount) editDeckCount.textContent = count;
+  const editAddMoreBtn = document.getElementById('edit-add-more-btn');
+  if (editAddMoreBtn) {
+    if (count >= 60) {
+      editAddMoreBtn.disabled = true;
+      editAddMoreBtn.style.opacity = '0.5';
+      editAddMoreBtn.style.cursor = 'not-allowed';
+      editAddMoreBtn.title = 'المجموعة ممتلئة بالكامل (60/60)';
+    } else {
+      editAddMoreBtn.disabled = false;
+      editAddMoreBtn.style.opacity = '1';
+      editAddMoreBtn.style.cursor = 'pointer';
+      editAddMoreBtn.title = `إضافة كروت جديدة (المتبقي: ${60 - count})`;
+    }
+  }
 }
 
 function renderEditCards() {
@@ -109,6 +143,10 @@ function renderEditCards() {
         cardIndexToReplace = index;
         replaceSearchInput.value = '';
         replaceTypeFilter.value = 'all';
+        const replaceTitle = document.getElementById('replace-modal-title');
+        if (replaceTitle) {
+          replaceTitle.textContent = 'اختر بطاقة بديلة';
+        }
         renderReplaceCards();
         replaceModal.style.display = 'flex';
       });
@@ -181,12 +219,35 @@ function renderReplaceCards() {
         cardIndexToReplace = -1;
         replaceModal.style.display = 'none';
         renderEditCards();
+      } else {
+        if (currentEditingDeckCards.length >= 60) {
+          alert("وصلت المجموعة إلى الحد الأقصى (60/60)!");
+          replaceModal.style.display = 'none';
+          return;
+        }
+        currentEditingDeckCards.push(card.id);
+        renderEditCards();
+        const replaceTitle = document.getElementById('replace-modal-title');
+        if (replaceTitle) {
+          replaceTitle.textContent = `إضافة بطاقات للمجموعة (${currentEditingDeckCards.length}/60)`;
+        }
+        if (currentEditingDeckCards.length >= 60) {
+          alert("اكتملت المجموعة بالكامل (60/60)!");
+          replaceModal.style.display = 'none';
+        }
       }
     });
     
     setupCardPreview(cardEl, img.src);
     replaceCardsContainer.appendChild(cardEl);
   });
+}
+
+function extractCardList(cardsVal) {
+  if (!cardsVal) return [];
+  if (Array.isArray(cardsVal)) return [...cardsVal];
+  if (typeof cardsVal === 'object') return Object.values(cardsVal);
+  return [];
 }
 
 function loadUserDecks() {
@@ -204,10 +265,22 @@ function loadUserDecks() {
         const deck = data[key];
         const deckEl = document.createElement('div');
         deckEl.className = 'deck-card';
+        
+        const mainCards = extractCardList(deck.mainDeck || deck.cards);
+        const extraCards = extractCardList(deck.extraDeck);
+        const sideCards = extractCardList(deck.sideDeck);
+        
+        const mainCount = mainCards.length;
+        const extraCount = extraCards.length;
+        const sideCount = sideCards.length;
+        
         deckEl.innerHTML = `
           <h3>${deck.name}</h3>
-          <p>يحتوي على ${deck.cards ? deck.cards.length : 0} كارت</p>
-          <div class="deck-actions-btn">
+          <p style="font-size: 0.85rem;">
+            أساسية: ${mainCount} | إضافية: ${extraCount} | جانبية: ${sideCount}
+          </p>
+          ${deck.visibility === 'public' ? '<span style="color:var(--accent-gold);font-size:0.8rem;">[عام]</span>' : '<span style="color:var(--text-muted);font-size:0.8rem;">[خاص]</span>'}
+          <div class="deck-actions-btn" style="margin-top: 10px;">
             <button class="btn-play">لعب</button>
             <button class="btn-preview">تعديل</button>
             <button class="btn-delete">حذف</button>
@@ -217,12 +290,13 @@ function loadUserDecks() {
         // Play action
         const playBtn = deckEl.querySelector('.btn-play');
         playBtn.addEventListener('click', () => {
-          if (deck.cards && deck.cards.length >= 40 && deck.cards.length <= 60) {
+          const mDeck = extractCardList(deck.mainDeck || deck.cards);
+          if (mDeck.length >= 40 && mDeck.length <= 60) {
             sessionStorage.removeItem('yugioh_game_full_state');
-            sessionStorage.setItem('ygo_deck', JSON.stringify(deck.cards));
+            sessionStorage.setItem('ygo_deck', JSON.stringify(mDeck));
             window.location.href = 'game.html';
           } else {
-            alert('هذه المجموعة غير صالحة للعب (يجب أن تحتوي على 40-60 كارت).');
+            alert('المجموعة الأساسية غير صالحة للعب (يجب أن تحتوي على 40-60 كارت).');
           }
         });
         
@@ -230,8 +304,13 @@ function loadUserDecks() {
         const editBtn = deckEl.querySelector('.btn-preview');
         editBtn.addEventListener('click', () => {
           currentEditingDeckId = key;
-          currentEditingDeckCards = deck.cards ? [...deck.cards] : [];
+          currentEditingDeckCards = extractCardList(deck.mainDeck || deck.cards);
+           
           editDeckNameHeader.textContent = `تعديل المجموعة: ${deck.name}`;
+          const editDeckVisibility = document.getElementById('edit-deck-visibility');
+          if (editDeckVisibility) {
+            editDeckVisibility.value = deck.visibility || 'private';
+          }
           
           renderEditCards();
           
@@ -248,7 +327,11 @@ function loadUserDecks() {
             try {
               newSaveBtn.disabled = true;
               newSaveBtn.textContent = 'جاري الحفظ...';
-              await set(ref(db, `users/${currentUser.uid}/decks/${currentEditingDeckId}/cards`), currentEditingDeckCards);
+              await set(ref(db, `users/${currentUser.uid}/decks/${currentEditingDeckId}/mainDeck`), currentEditingDeckCards);
+              const editDeckVisibility = document.getElementById('edit-deck-visibility');
+              if (editDeckVisibility) {
+                await set(ref(db, `users/${currentUser.uid}/decks/${currentEditingDeckId}/visibility`), editDeckVisibility.value);
+              }
               alert("تم حفظ التعديلات بنجاح!");
               editModal.style.display = 'none';
             } catch (err) {

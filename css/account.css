@@ -1,0 +1,67 @@
+@import "design-tokens.css";
+
+.account-hub-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-24);
+  padding: var(--space-32) 0;
+}
+
+.account-card {
+  background: var(--bg-panel);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: var(--radius-interactive-lg);
+  padding: var(--space-32) var(--space-24);
+  text-align: center;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-16);
+  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.account-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-glow-hover);
+  border-color: var(--gold-primary);
+}
+
+.account-card i {
+  font-size: 3.5rem;
+  color: var(--gold-primary);
+}
+
+.account-card h3 {
+  margin: 0;
+  font-family: var(--font-heading);
+  color: var(--gold-bright);
+  font-size: var(--text-xl);
+}
+
+.account-card p {
+  margin: 0;
+  color: var(--ink-faded);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.account-header {
+  text-align: center;
+  margin-bottom: var(--space-16);
+  padding-top: var(--space-32);
+}
+
+.account-header h1 {
+  color: var(--gold-primary);
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  margin-bottom: var(--space-8);
+}
+
+.account-header p {
+  color: var(--ink-faded);
+  margin: 0;
+  font-size: var(--text-lg);
+}

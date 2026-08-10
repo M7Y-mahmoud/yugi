@@ -98,6 +98,7 @@
           <i class="ph ph-user"></i>
           <span id="user-welcome" style="color: var(--gold-bright);"></span>
         </div>
+        <a href="account.html"><i class="ph ph-user-circle"></i> حسابي</a>
         <a href="admin/dashboard.html" id="admin-link-dropdown" style="display: none;"><i class="ph ph-shield-check"></i> الإدارة</a>
         <button id="user-logout-btn" class="side-logout-btn"><i class="ph ph-sign-out"></i> تسجيل الخروج</button>
       </div>
@@ -120,27 +121,37 @@
   </main>
 
   <!-- Deck Edit Modal -->
-  <div id="deck-edit-modal" class="modal">
+  <div id="deck-edit-modal" class="modal" style="z-index: 2000;">
     <div class="modal-content" style="max-width: 900px; padding: 20px; width: 95%;">
       <span class="close-btn" id="close-edit-modal">&times;</span>
       <h2 id="edit-deck-name-header" style="margin-top: 0; color: var(--text-primary);">تعديل المجموعة</h2>
-      <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
-        <span class="deck-count-label">عدد الكروت: <span id="edit-deck-count">0</span> / 60</span>
+      <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <span class="deck-count-label">عدد الكروت الأساسية: <span id="edit-deck-count">0</span> / 60</span>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <label style="color: var(--text-primary); font-size: 0.9rem;">الخصوصية:</label>
+          <select id="edit-deck-visibility" style="background: var(--bg-void); color: var(--gold-primary); border: 1px solid var(--gold-primary); border-radius: 4px; padding: 5px;">
+            <option value="private">خاص</option>
+            <option value="public">عام</option>
+          </select>
+        </div>
       </div>
       <div id="edit-cards-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 20px; max-height: 60vh; overflow-y: auto;">
         <!-- Cards will be dynamically loaded here -->
       </div>
-      <div style="margin-top: 20px; text-align: center;">
+      <div style="margin-top: 20px; text-align: center; display: flex; justify-content: center; align-items: center; gap: 15px; flex-wrap: wrap;">
+        <button id="edit-add-more-btn" class="btn-primary" style="font-size: 1.05rem; padding: 10px 24px; display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #ffd700, #d4af37); color: #120c08; border: 1px solid #ffe600; border-radius: 8px; font-weight: bold; cursor: pointer;">
+          <i class="ph ph-plus-circle"></i> إضافة المزيد
+        </button>
         <button id="edit-save-btn" class="btn-secondary" style="font-size: 1.1rem; padding: 10px 30px;">حفظ التعديلات</button>
       </div>
     </div>
   </div>
 
   <!-- Replace Card Selection Modal -->
-  <div id="replace-card-modal" class="modal" style="z-index: 1000;">
+  <div id="replace-card-modal" class="modal" style="z-index: 3000;">
     <div class="modal-content" style="max-width: 900px; padding: 20px; width: 95%;">
       <span class="close-btn" id="close-replace-modal">&times;</span>
-      <h2 style="margin-top: 0; color: var(--text-primary);">اختر بطاقة بديلة</h2>
+      <h2 id="replace-modal-title" style="margin-top: 0; color: var(--text-primary);">اختر بطاقة بديلة</h2>
       <div class="controls" style="margin-bottom: 15px;">
         <input type="text" id="replace-search-input" placeholder="ابحث باسم الكارت...">
         <select id="replace-type-filter">

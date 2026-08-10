@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الأصدقاء - Yu-Gi-Oh!</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎴</text></svg>">
+  <link rel="stylesheet" href="css/main.css">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script type="module" src="js/navbar.js"></script>
+  <style>
+    .friends-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-24);
+      padding: var(--space-24) 0 var(--space-16);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    .friends-header h1 {
+      color: var(--gold-primary);
+      font-family: var(--font-heading);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .friends-header h1 i {
+      color: var(--gold-bright);
+    }
+
+    /* Tabs */
+    .friends-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: var(--space-24);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+      padding-bottom: 8px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: var(--font-arabic);
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--gold-bright);
+      background: rgba(212, 175, 55, 0.05);
+    }
+
+    .tab-btn.active {
+      color: var(--gold-primary);
+      background: rgba(212, 175, 55, 0.1);
+      border-color: rgba(212, 175, 55, 0.3);
+      font-weight: bold;
+    }
+
+    .badge-count {
+      background: var(--accent-wine);
+      color: white;
+      font-size: 0.75rem;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Search Section */
+    .search-box-wrapper {
+      display: flex;
+      gap: 12px;
+      margin-bottom: var(--space-24);
+      max-width: 600px;
+    }
+
+    .search-input {
+      flex: 1;
+      background: rgba(18, 18, 18, 0.8);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      color: var(--text-primary);
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--gold-primary);
+    }
+
+    .btn-search {
+      background: var(--gold-primary);
+      color: var(--bg-void);
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .btn-search:hover {
+      background: var(--gold-bright);
+      transform: translateY(-2px);
+    }
+
+    /* Cards Grid */
+    .user-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .user-card {
+      background: rgba(22, 16, 12, 0.85);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 12px;
+      position: relative;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .user-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--gold-primary);
+    }
+
+    .user-avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: 2px solid var(--gold-primary);
+      object-fit: cover;
+      background: var(--bg-panel);
+    }
+
+    .user-info {
+      width: 100%;
+    }
+
+    .user-name {
+      margin: 0 0 6px 0;
+      color: var(--gold-primary);
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    .user-bio {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      margin-top: auto;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--gold-primary);
+      color: var(--bg-void);
+    }
+
+    .btn-primary:hover {
+      background: var(--gold-bright);
+    }
+
+    .btn-danger {
+      background: rgba(231, 76, 60, 0.15);
+      color: #e74c3c;
+      border: 1px solid #e74c3c;
+    }
+
+    .btn-danger:hover {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-disabled {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: default;
+    }
+
+    .empty-msg {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--text-muted);
+      padding: 40px;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- زر الهمبرغر العائم -->
+  <button id="hamburger-btn" class="floating-hamburger">
+    <i class="ph ph-list"></i>
+  </button>
+
+  <!-- الطبقة الضبابية -->
+  <div id="menu-overlay" class="menu-overlay"></div>
+
+  <!-- القائمة الجانبية -->
+  <nav id="side-menu" class="side-menu">
+    <div class="side-menu-header">
+      <img src="public/assets/images/logo.png" alt="Yu-Gi-Oh!" class="side-logo">
+      <button id="close-menu-btn" class="close-menu-btn">&times;</button>
+    </div>
+
+    <div class="side-menu-links">
+      <a href="index.html"><i class="ph ph-house"></i> الرئيسية</a>
+      <a href="library.html"><i class="ph ph-cards"></i> البطاقات</a>
+      
+      <div class="side-divider"></div>
+      
+      <a href="#" id="user-login-btn" class="login-link" style="display: none;"><i class="ph ph-sign-in"></i> تسجيل الدخول</a>
+      
+      <div id="user-profile-container" class="side-user-profile">
+        <div class="user-welcome-box">
+          <i class="ph ph-user"></i>
+          <span id="user-welcome" style="color: var(--gold-bright);"></span>
+        </div>
+        <a href="account.html"><i class="ph ph-user-circle"></i> حسابي</a>
+        <a href="favorites.html"><i class="ph ph-star"></i> المفضلة</a>
+        <a href="friends.html" class="active"><i class="ph ph-users"></i> الأصدقاء</a>
+        <a href="notifications.html"><i class="ph ph-bell"></i> الإشعارات</a>
+        <a href="settings.html"><i class="ph ph-gear"></i> الإعدادات</a>
+        <a href="admin/dashboard.html" id="admin-link-dropdown" style="display: none;"><i class="ph ph-shield-check"></i> الإدارة</a>
+        <button id="user-logout-btn" class="side-logout-btn"><i class="ph ph-sign-out"></i> تسجيل الخروج</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="friends-header">
+      <h1><i class="ph ph-users"></i> الأصدقاء</h1>
+      <span id="friends-total-count" style="color: var(--text-muted); font-size: 1.1rem;">0 صديق</span>
+    </div>
+
+    <!-- الأقسام/المبوبة -->
+    <div class="friends-tabs">
+      <button class="tab-btn active" data-tab="tab-friends-list">
+        <i class="ph ph-user-check"></i> قائمة الأصدقاء
+      </button>
+      <button class="tab-btn" data-tab="tab-incoming-requests">
+        <i class="ph ph-arrow-down-left"></i> الطلبات الواردة
+        <span id="badge-incoming" class="badge-count" style="display: none;">0</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-outgoing-requests">
+        <i class="ph ph-arrow-up-right"></i> الطلبات الصادرة
+        <span id="badge-outgoing" class="badge-count" style="display: none;">0</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-search-users">
+        <i class="ph ph-magnifying-glass"></i> البحث عن أصدقاء
+      </button>
+    </div>
+
+    <div id="loading-state" style="text-align: center; color: var(--text-muted); font-size: 1.2rem; padding: 40px;">
+      جاري التحميل...
+    </div>
+
+    <!-- تبويب 1: قائمة الأصدقاء -->
+    <div id="tab-friends-list" class="tab-content active">
+      <div id="friends-list-container" class="user-grid"></div>
+    </div>
+
+    <!-- تبويب 2: الطلبات الواردة -->
+    <div id="tab-incoming-requests" class="tab-content">
+      <div id="incoming-requests-container" class="user-grid"></div>
+    </div>
+
+    <!-- تبويب 3: الطلبات الصادرة -->
+    <div id="tab-outgoing-requests" class="tab-content">
+      <div id="outgoing-requests-container" class="user-grid"></div>
+    </div>
+
+    <!-- تبويب 4: البحث عن أصدقاء -->
+    <div id="tab-search-users" class="tab-content">
+      <div class="search-box-wrapper">
+        <input type="text" id="user-search-input" class="search-input" placeholder="ابحث باسم المستخدم (username)...">
+        <button id="user-search-btn" class="btn-search">
+          <i class="ph ph-magnifying-glass"></i> بحث
+        </button>
+      </div>
+      <div id="search-results-container" class="user-grid"></div>
+    </div>
+  </main>
+
+  <script type="module" src="js/firebase-config.js"></script>
+  <script type="module" src="js/friends.js"></script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 import { setupCardPreview } from "./card-preview.js";
-import { ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { db } from "./firebase-config.js";
+import { ref, get, set, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { auth, db } from "./firebase-config.js";
 
 const DECK_STORAGE_KEY = 'ygo_deck';
 const STATE_STORAGE_KEY = 'yugioh_game_full_state';
@@ -720,6 +720,9 @@ function showCardDetails(card) {
   if (!card || !cardDetailsBody || !cardDetailsModal) return;
   cardDetailsBody.innerHTML = `
     <img src="${card.imageUrl || CARD_BACK_URL}" alt="${card.name}">
+    <button class="card-fav-btn" data-id="${card.id}" style="position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.7); border: 1px solid var(--gold-primary); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; z-index: 100;">
+      <i class="ph ph-heart"></i>
+    </button>
     <div class="card-details-info">
       <h3 class="english-text">${card.name}</h3>
       <p><strong>النوع:</strong> ${card.type || 'غير معروف'}</p>
@@ -730,6 +733,7 @@ function showCardDetails(card) {
     </div>
   `;
   cardDetailsModal.style.display = 'flex';
+  if (typeof updateGameFavButton === 'function') updateGameFavButton(card.id);
 }
 
 function renderGraveyardPopover() {
@@ -796,3 +800,48 @@ function shuffleArray(array) {
 }
 
 document.addEventListener('DOMContentLoaded', initGame);
+
+// Handle fav button click in modal
+document.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.card-fav-btn');
+  if (!btn) return;
+  const cardId = btn.dataset.id;
+  if (!cardId) return;
+  
+  if (!auth.currentUser) {
+    alert('يجب تسجيل الدخول لإضافة الكارت للمفضلة');
+    return;
+  }
+  
+  const favRef = ref(db, `favorites/${auth.currentUser.uid}/${cardId}`);
+  try {
+    const snap = await get(favRef);
+    if (snap.exists()) {
+      await remove(favRef);
+      btn.innerHTML = '<i class="ph ph-heart"></i>';
+      btn.style.color = 'white';
+    } else {
+      await set(favRef, true);
+      btn.innerHTML = '<i class="ph-fill ph-heart"></i>';
+      btn.style.color = '#e74c3c';
+    }
+  } catch(err) {
+    console.error(err);
+  }
+});
+
+// Update fav button status when modal opens
+function updateGameFavButton(cardId) {
+  const btn = document.querySelector('#card-details-modal .card-fav-btn');
+  if (!btn || !auth.currentUser) return;
+  const favRef = ref(db, `favorites/${auth.currentUser.uid}/${cardId}`);
+  get(favRef).then(snap => {
+    if (snap.exists()) {
+      btn.innerHTML = '<i class="ph-fill ph-heart"></i>';
+      btn.style.color = '#e74c3c';
+    } else {
+      btn.innerHTML = '<i class="ph ph-heart"></i>';
+      btn.style.color = 'white';
+    }
+  });
+}

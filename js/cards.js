@@ -1,8 +1,10 @@
+import { ref as dbRef, get as dbGet, set as dbSet, remove as dbRemove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { setupCardPreview } from "./card-preview.js";
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { ref, onValue, set, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { getDeck, saveDeck, getDeckCount, toggleCardInDeck, isCardSelected, clearDeck } from "./deck-builder.js";
+import { getDeck, saveDeck, getDeckCount, toggleCardInDeck, isCardSelected, clearDeck, activeDeckSection, setActiveDeckSection } from "./deck-builder.js";
+import { handleAuthError, loginUser, registerUser } from "./auth.js";
 
 const cardsContainer = document.getElementById('cards-container');
 const searchInput = document.getElementById('search-input');
@@ -11,6 +13,10 @@ const deckCountEl = document.getElementById('deck-count');
 const saveDeckBtn = document.getElementById('save-deck-btn');
 
 const deckNameInput = document.getElementById('deck-name-input');
+const deckVisibilitySelect = document.getElementById('deck-visibility-select');
+const deckDescInput = document.getElementById('deck-desc-input');
+const deckSectionSelect = document.getElementById('deck-section-select');
+const deckLimitEl = document.getElementById('deck-limit');
 const deckStickyBar = document.getElementById('deck-sticky-bar');
 const enterBuildModeBtn = document.getElementById('enter-build-mode-btn');
 const cancelBuildBtn = document.getElementById('cancel-build-btn');
@@ -85,6 +91,7 @@ function init() {
       }
     }
     renderCards(allCards);
+    updateFavButtons();
   });
 
   searchInput.addEventListener('input', filterCards);
@@ -140,10 +147,10 @@ function setupAuthUI() {
       const email = authEmail.value;
       const password = authPassword.value;
       try {
-        await signInWithEmailAndPassword(auth, email, password);
+        await loginUser(email, password);
         authModal.style.display = 'none';
       } catch (err) {
-        authError.textContent = 'خطأ في تسجيل الدخول. ' + err.message;
+        authError.textContent = handleAuthError(err);
       }
     });
 
@@ -156,16 +163,33 @@ function setupAuthUI() {
       const email = authEmail.value;
       const password = authPassword.value;
       try {
-        await createUserWithEmailAndPassword(auth, email, password);
+        await registerUser(email, password);
         authModal.style.display = 'none';
       } catch (err) {
-        authError.textContent = 'خطأ في إنشاء الحساب. ' + err.message;
+        authError.textContent = handleAuthError(err);
       }
     });
   }
 }
 
 function setupDeckManagementUI() {
+  const heroBuildDeckBtn = document.getElementById('hero-start-build-action');
+  if (heroBuildDeckBtn) {
+    heroBuildDeckBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (!isBuildMode && enterBuildModeBtn) {
+        enterBuildModeBtn.click();
+      }
+      const deckBar = document.getElementById('deck-sticky-bar');
+      if (deckBar && deckBar.style.display !== 'none') {
+        deckBar.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        const cardsCont = document.getElementById('cards-container');
+        if (cardsCont) cardsCont.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  }
+
   if (enterBuildModeBtn) {
     enterBuildModeBtn.addEventListener('click', () => {
       clearDeck();
@@ -192,6 +216,23 @@ function setupDeckManagementUI() {
     });
   }
 
+  const deckAddMoreBtn = document.getElementById('deck-add-more-btn');
+  if (deckAddMoreBtn) {
+    deckAddMoreBtn.addEventListener('click', () => {
+      const currentSection = activeDeckSection || 'mainDeck';
+      const limit = currentSection === 'mainDeck' ? 60 : 15;
+      const count = getDeckCount(currentSection);
+      if (count >= limit) {
+        alert(`المجموعة ممتلئة بالفعل (${limit}/${limit})!`);
+        return;
+      }
+      const cardsCont = document.getElementById('cards-container');
+      if (cardsCont) {
+        cardsCont.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  }
+
   saveDeckBtn.addEventListener('click', async () => {
     if (!currentUser) {
       alert("يجب تسجيل الدخول أولاً لحفظ المجموعة.");
@@ -214,9 +255,13 @@ function setupDeckManagementUI() {
     const userDecksRef = ref(db, `users/${currentUser.uid}/decks`);
     const newDeckRef = push(userDecksRef);
     try {
+      const d = getDeck();
       await set(newDeckRef, {
         name: deckName,
-        cards: getDeck(),
+        mainDeck: d.mainDeck || [],
+        extraDeck: d.extraDeck || [],
+        sideDeck: d.sideDeck || [],
+        cards: d.mainDeck || [],
         createdAt: Date.now()
       });
       clearDeck();
@@ -235,20 +280,43 @@ function setupDeckManagementUI() {
   });
 }
 
+
+  if (deckSectionSelect) {
+    deckSectionSelect.addEventListener('change', (e) => {
+      setActiveDeckSection(e.target.value);
+      deckLimitEl.textContent = e.target.value === 'mainDeck' ? '60' : '15';
+      updateDeckUI();
+      renderCards(allCards);
+    });
+  }
+
 function updateDeckUI() {
+  const currentSection = activeDeckSection || 'mainDeck';
+  const limit = currentSection === 'mainDeck' ? 60 : 15;
+  const count = getDeckCount(currentSection);
+
   if (deckStickyBar) {
-    if (getDeckCount() === 60) {
+    if (count >= limit) {
       deckStickyBar.classList.add('deck-full');
     } else {
       deckStickyBar.classList.remove('deck-full');
     }
   }
-  const count = getDeckCount();
-  deckCountEl.textContent = count;
-  if (count >= 40 && count <= 60) {
-    
-  } else {
-    
+  if (deckCountEl) deckCountEl.textContent = count;
+
+  const deckAddMoreBtn = document.getElementById('deck-add-more-btn');
+  if (deckAddMoreBtn) {
+    if (count >= limit) {
+      deckAddMoreBtn.disabled = true;
+      deckAddMoreBtn.style.opacity = '0.5';
+      deckAddMoreBtn.style.cursor = 'not-allowed';
+      deckAddMoreBtn.title = `المجموعة ممتلئة (${limit}/${limit})`;
+    } else {
+      deckAddMoreBtn.disabled = false;
+      deckAddMoreBtn.style.opacity = '1';
+      deckAddMoreBtn.style.cursor = 'pointer';
+      deckAddMoreBtn.title = `إضافة المزيد من الكروت (المتبقي: ${limit - count})`;
+    }
   }
 }
 
@@ -282,8 +350,11 @@ function renderCards(cardsToRender) {
     else if (card.type === 'Trap') typeClass = 'type-trap';
     
     let imageUrl = card.imageUrl || 'https://via.placeholder.com/220x320?text=No+Image';
-    setupCardPreview(cardEl, imageUrl);
+    setupCardPreview(cardEl, card);
     cardEl.innerHTML = `
+      <button class="card-fav-btn" data-id="${card.id}" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); border: 1px solid var(--gold-primary); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; z-index: 5;">
+        <i class="ph ph-heart"></i>
+      </button>
       <img src="${imageUrl}" alt="${card.name}" class="card-image" loading="lazy">
       <div class="card-content">
         <h3 class="card-name english-text">${card.name}</h3>
@@ -291,8 +362,17 @@ function renderCards(cardsToRender) {
       </div>
     `;
     
-    cardEl.addEventListener('click', () => {
-      if (!isBuildMode) return;
+    cardEl.addEventListener('click', (e) => {
+      if (e.target.closest('.card-fav-btn')) {
+        e.stopPropagation();
+        toggleFavorite(card.id, e.target.closest('.card-fav-btn'));
+        return;
+      }
+      if (!isBuildMode) {
+        // If not build mode, maybe we can show preview on click for desktop?
+        // But for now, just return.
+        return;
+      }
 
       const currentlySelected = cardEl.classList.contains('selected');
       // If we are at 60 and not currently selected, the toggle will alert, so we handle UI correctly
@@ -328,3 +408,47 @@ function filterCards() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+
+
+async function toggleFavorite(cardId, btnElement) {
+  if (!auth.currentUser) {
+    alert('يجب تسجيل الدخول لإضافة الكارت للمفضلة');
+    return;
+  }
+  const favRef = dbRef(db, `favorites/${auth.currentUser.uid}/${cardId}`);
+  try {
+    const snap = await dbGet(favRef);
+    if (snap.exists()) {
+      await dbRemove(favRef);
+      btnElement.innerHTML = '<i class="ph ph-heart"></i>';
+      btnElement.style.color = 'white';
+    } else {
+      await dbSet(favRef, true);
+      btnElement.innerHTML = '<i class="ph-fill ph-heart"></i>';
+      btnElement.style.color = '#e74c3c';
+    }
+  } catch(err) {
+    console.error(err);
+  }
+}
+
+function updateFavButtons() {
+  if (!auth.currentUser) return;
+  const favsRef = dbRef(db, `favorites/${auth.currentUser.uid}`);
+  dbGet(favsRef).then(snap => {
+    if (snap.exists()) {
+      const favs = snap.val();
+      document.querySelectorAll('.card-fav-btn').forEach(btn => {
+        const id = btn.dataset.id;
+        if (favs[id]) {
+          btn.innerHTML = '<i class="ph-fill ph-heart"></i>';
+          btn.style.color = '#e74c3c';
+        } else {
+          btn.innerHTML = '<i class="ph ph-heart"></i>';
+          btn.style.color = 'white';
+        }
+      });
+    }
+  });
+}

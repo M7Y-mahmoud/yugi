@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الإعدادات - Yu-Gi-Oh!</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎴</text></svg>">
+  <link rel="stylesheet" href="css/main.css">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script type="module" src="js/navbar.js"></script>
+  <style>
+    .settings-header {
+      margin-bottom: var(--space-24);
+      padding: var(--space-24) 0 var(--space-16);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    .settings-header h1 {
+      color: var(--gold-primary);
+      font-family: var(--font-heading);
+      margin: 0 0 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .settings-header p {
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .settings-card {
+      background: rgba(22, 16, 12, 0.85);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .settings-card.danger-zone {
+      border-color: rgba(231, 76, 60, 0.4);
+      background: rgba(28, 12, 12, 0.85);
+    }
+
+    .card-title {
+      color: var(--gold-primary);
+      font-size: 1.2rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+      padding-bottom: 12px;
+    }
+
+    .danger-zone .card-title {
+      color: #e74c3c;
+      border-bottom-color: rgba(231, 76, 60, 0.2);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      color: var(--gold-bright);
+      font-size: 0.95rem;
+      font-weight: bold;
+    }
+
+    .form-control {
+      background: rgba(18, 18, 18, 0.8);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      color: var(--text-primary);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: var(--font-arabic);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: var(--gold-primary);
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .avatar-preview-box {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+
+    .avatar-preview-img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: 2px solid var(--gold-primary);
+      object-fit: cover;
+      background: var(--bg-panel);
+    }
+
+    .avatar-presets {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .preset-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .preset-btn:hover {
+      transform: scale(1.1);
+      border-color: var(--gold-bright);
+    }
+
+    .preset-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--gold-primary);
+      cursor: pointer;
+    }
+
+    .btn-save {
+      background: var(--gold-primary);
+      color: var(--bg-void);
+      border: none;
+      padding: 11px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s, transform 0.2s;
+      margin-top: 8px;
+    }
+
+    .btn-save:hover {
+      background: var(--gold-bright);
+      transform: translateY(-2px);
+    }
+
+    .btn-danger {
+      background: rgba(231, 76, 60, 0.2);
+      color: #e74c3c;
+      border: 1px solid #e74c3c;
+      padding: 11px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-danger:hover {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .status-msg {
+      font-size: 0.9rem;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-msg.success {
+      display: block;
+      background: rgba(46, 204, 113, 0.15);
+      color: #2ecc71;
+      border: 1px solid #2ecc71;
+    }
+
+    .status-msg.error {
+      display: block;
+      background: rgba(231, 76, 60, 0.15);
+      color: #e74c3c;
+      border: 1px solid #e74c3c;
+    }
+
+    /* Delete Account Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: var(--bg-panel);
+      border: 2px solid #e74c3c;
+      border-radius: 12px;
+      padding: 28px;
+      max-width: 480px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    }
+
+    .modal-content h3 {
+      color: #e74c3c;
+      margin: 0;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-content p {
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .modal-actions button {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <!-- زر الهمبرغر العائم -->
+  <button id="hamburger-btn" class="floating-hamburger">
+    <i class="ph ph-list"></i>
+  </button>
+
+  <!-- الطبقة الضبابية -->
+  <div id="menu-overlay" class="menu-overlay"></div>
+
+  <!-- القائمة الجانبية -->
+  <nav id="side-menu" class="side-menu">
+    <div class="side-menu-header">
+      <img src="public/assets/images/logo.png" alt="Yu-Gi-Oh!" class="side-logo">
+      <button id="close-menu-btn" class="close-menu-btn">&times;</button>
+    </div>
+
+    <div class="side-menu-links">
+      <a href="index.html"><i class="ph ph-house"></i> الرئيسية</a>
+      <a href="library.html"><i class="ph ph-cards"></i> البطاقات</a>
+      
+      <div class="side-divider"></div>
+      
+      <a href="#" id="user-login-btn" class="login-link" style="display: none;"><i class="ph ph-sign-in"></i> تسجيل الدخول</a>
+      
+      <div id="user-profile-container" class="side-user-profile">
+        <div class="user-welcome-box">
+          <i class="ph ph-user"></i>
+          <span id="user-welcome" style="color: var(--gold-bright);"></span>
+        </div>
+        <a href="account.html"><i class="ph ph-user-circle"></i> حسابي</a>
+        <a href="favorites.html"><i class="ph ph-star"></i> المفضلة</a>
+        <a href="friends.html"><i class="ph ph-users"></i> الأصدقاء</a>
+        <a href="notifications.html"><i class="ph ph-bell"></i> الإشعارات</a>
+        <a href="settings.html" class="active"><i class="ph ph-gear"></i> الإعدادات</a>
+        <a href="admin/dashboard.html" id="admin-link-dropdown" style="display: none;"><i class="ph ph-shield-check"></i> الإدارة</a>
+        <button id="user-logout-btn" class="side-logout-btn"><i class="ph ph-sign-out"></i> تسجيل الخروج</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="settings-header">
+      <h1><i class="ph ph-gear"></i> إعدادات الحساب</h1>
+      <p>قم بإدارة بياناتك الشخصية والأمان وتفضيلات الخصوصية من مكان واحد.</p>
+    </div>
+
+    <div id="loading-state" style="text-align: center; color: var(--text-muted); font-size: 1.2rem; padding: 40px;">
+      جاري تحميل الإعدادات...
+    </div>
+
+    <div id="settings-content" class="settings-grid" style="display: none;">
+      
+      <!-- 1. تعديل الملف الشخصي -->
+      <div class="settings-card">
+        <h3 class="card-title"><i class="ph ph-user-circle"></i> الملف الشخصي</h3>
+        
+        <div class="avatar-preview-box">
+          <img id="avatar-preview" src="" alt="Avatar" class="avatar-preview-img">
+          <div>
+            <label style="color: var(--gold-bright); font-size: 0.85rem; font-weight: bold; display: block; margin-bottom: 4px;">نماذج سريعة:</label>
+            <div class="avatar-presets">
+              <button class="preset-btn" data-seed="Yugi"><img src="https://api.dicebear.com/9.x/adventurer/svg?seed=Yugi" alt="Preset 1"></button>
+              <button class="preset-btn" data-seed="Kaiba"><img src="https://api.dicebear.com/9.x/adventurer/svg?seed=Kaiba" alt="Preset 2"></button>
+              <button class="preset-btn" data-seed="Joey"><img src="https://api.dicebear.com/9.x/adventurer/svg?seed=Joey" alt="Preset 3"></button>
+              <button class="preset-btn" data-seed="Marik"><img src="https://api.dicebear.com/9.x/adventurer/svg?seed=Marik" alt="Preset 4"></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="setting-avatar-url">رابط الصورة الشخصية (Avatar URL)</label>
+          <input type="text" id="setting-avatar-url" class="form-control" placeholder="https://...">
+        </div>
+
+        <div class="form-group">
+          <label for="setting-username">اسم المستخدم (Username)</label>
+          <input type="text" id="setting-username" class="form-control" placeholder="اسم المستخدم">
+        </div>
+
+        <div class="form-group">
+          <label for="setting-bio">النبذة الشخصية (Bio)</label>
+          <textarea id="setting-bio" class="form-control" placeholder="اكتب نبذة عنك..."></textarea>
+        </div>
+
+        <div id="profile-status" class="status-msg"></div>
+
+        <button id="save-profile-btn" class="btn-save">
+          <i class="ph ph-floppy-disk"></i> حفظ الملف الشخصي
+        </button>
+      </div>
+
+      <!-- 2. أمان الحساب -->
+      <div class="settings-card">
+        <h3 class="card-title"><i class="ph ph-shield-check"></i> أمان الحساب</h3>
+
+        <div class="form-group">
+          <label for="setting-email">البريد الإلكتروني</label>
+          <input type="email" id="setting-email" class="form-control" placeholder="example@mail.com">
+        </div>
+
+        <button id="update-email-btn" class="btn-save" style="background: rgba(212, 175, 55, 0.15); color: var(--gold-bright); border: 1px solid rgba(212, 175, 55, 0.3);">
+          تحديث البريد الإلكتروني
+        </button>
+
+        <div style="border-top: 1px dashed rgba(212, 175, 55, 0.15); margin: 6px 0;"></div>
+
+        <div class="form-group">
+          <label for="setting-new-password">كلمة المرور الجديدة</label>
+          <input type="password" id="setting-new-password" class="form-control" placeholder="••••••••">
+        </div>
+
+        <button id="update-password-btn" class="btn-save" style="background: rgba(212, 175, 55, 0.15); color: var(--gold-bright); border: 1px solid rgba(212, 175, 55, 0.3);">
+          تحديث كلمة المرور
+        </button>
+
+        <div id="security-status" class="status-msg"></div>
+      </div>
+
+      <!-- 3. الخصوصية والإشعارات -->
+      <div class="settings-card">
+        <h3 class="card-title"><i class="ph ph-bell"></i> الخصوصية والإشعارات</h3>
+
+        <div class="form-group">
+          <label for="setting-deck-visibility">الخصوصية الافتراضية للمجموعات</label>
+          <select id="setting-deck-visibility" class="form-control">
+            <option value="public">عامة (يمكن للجميع رؤيتها)</option>
+            <option value="private">خاصة (لي فقط)</option>
+          </select>
+        </div>
+
+        <label class="checkbox-group">
+          <input type="checkbox" id="setting-allow-friend-req" checked>
+          <span>السماح للمستخدمين بإرسال طلبات صداقة</span>
+        </label>
+
+        <label class="checkbox-group">
+          <input type="checkbox" id="setting-notify-friend-req" checked>
+          <span>إشعارات عند تلقي طلب صداقة جديد</span>
+        </label>
+
+        <label class="checkbox-group">
+          <input type="checkbox" id="setting-notify-friend-accept" checked>
+          <span>إشعارات عند قبول طلب الصداقة</span>
+        </label>
+
+        <div id="preferences-status" class="status-msg"></div>
+
+        <button id="save-preferences-btn" class="btn-save">
+          <i class="ph ph-sliders"></i> حفظ التفضيلات
+        </button>
+      </div>
+
+      <!-- 4. منطقة الخطر (حذف الحساب) -->
+      <div class="settings-card danger-zone" style="grid-column: 1 / -1;">
+        <h3 class="card-title"><i class="ph ph-warning-octagon"></i> منطقة الخطر</h3>
+
+        <p style="color: var(--text-primary); font-size: 0.95rem; margin: 0; line-height: 1.5;">
+          عند تعطيل/حذف الحساب، سيتم أرشفة حسابك وإخفاء معلوماتك الشخصية من قوائم البحث والبطاقات، مع الحفاظ على استقرار بيانات اللعبة وسجلات المواجهات.
+        </p>
+
+        <button id="open-delete-modal-btn" class="btn-danger" style="max-width: 250px;">
+          <i class="ph ph-user-minus"></i> حذف الحساب نهائياً
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Modal التأكيد على حذف الحساب -->
+  <div id="delete-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3><i class="ph ph-warning"></i> تأكيد حذف الحساب</h3>
+      <p>
+        هل أنت تأكد من رغبتك في حذف الحساب؟ سيتم أرشفة بياناتك وتسجيل خروجك فوراً.
+      </p>
+      <p style="color: var(--gold-bright); font-size: 0.9rem;">
+        اكتب كلمة "<strong style="color: #e74c3c;">حذف</strong>" في الحقل أدناه لتأكيد الإجراء:
+      </p>
+      <input type="text" id="delete-confirm-input" class="form-control" placeholder="حذف">
+
+      <div id="modal-delete-status" class="status-msg"></div>
+
+      <div class="modal-actions">
+        <button id="cancel-delete-btn" class="btn-save" style="background: rgba(255, 255, 255, 0.1); color: white;">إلغاء</button>
+        <button id="confirm-delete-btn" class="btn-danger" disabled>تأكيد الحذف</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/firebase-config.js"></script>
+  <script type="module" src="js/settings.js"></script>
+</body>
+</html>

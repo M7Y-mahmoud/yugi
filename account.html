@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مركز الحساب - Yu-Gi-Oh!</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎴</text></svg>">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/account.css">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script type="module" src="js/navbar.js"></script>
+</head>
+<body>
+  <!-- زر الهمبرغر العائم في زاوية الشاشة -->
+  <button id="hamburger-btn" class="floating-hamburger">
+    <i class="ph ph-list"></i>
+  </button>
+
+  <!-- الطبقة الضبابية في الخلفية -->
+  <div id="menu-overlay" class="menu-overlay"></div>
+
+  <!-- القائمة الجانبية -->
+  <nav id="side-menu" class="side-menu">
+    <div class="side-menu-header">
+      <img src="public/assets/images/logo.png" alt="Yu-Gi-Oh!" class="side-logo">
+      <button id="close-menu-btn" class="close-menu-btn">&times;</button>
+    </div>
+
+    <div class="side-search">
+      <input type="text" placeholder="ابحث...">
+      <span class="search-icon"><i class="ph ph-magnifying-glass"></i></span>
+    </div>
+
+    <div class="side-menu-links">
+      <a href="index.html"><i class="ph ph-house"></i> الرئيسية</a>
+      <a href="library.html"><i class="ph ph-cards"></i> البطاقات</a>
+      
+      <div class="side-divider"></div>
+      
+      <!-- قسم المستخدم -->
+      <a href="#" id="user-login-btn" class="login-link" style="display: none;"><i class="ph ph-sign-in"></i> تسجيل الدخول</a>
+      
+      <div id="user-profile-container" class="side-user-profile">
+        <div class="user-welcome-box">
+          <i class="ph ph-user"></i>
+          <span id="user-welcome" style="color: var(--gold-bright);"></span>
+        </div>
+        <a href="account.html" class="active"><i class="ph ph-user-circle"></i> حسابي</a>
+        <a href="favorites.html"><i class="ph ph-star"></i> المفضلة</a>
+        <a href="friends.html"><i class="ph ph-users"></i> الأصدقاء</a>
+        <a href="notifications.html"><i class="ph ph-bell"></i> الإشعارات</a>
+        <a href="admin/dashboard.html" id="admin-link-dropdown" style="display: none;"><i class="ph ph-shield-check"></i> الإدارة</a>
+        <button id="user-logout-btn" class="side-logout-btn"><i class="ph ph-sign-out"></i> تسجيل الخروج</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="account-header">
+      <h1>مركز الحساب</h1>
+      <p>أهلاً بك، تحكم في ملفك الشخصي ومجموعاتك من هنا.</p>
+    </div>
+
+    <div class="account-hub-container">
+      <a href="profile.html" class="account-card">
+        <i class="ph ph-user-circle"></i>
+        <h3>الملف الشخصي</h3>
+        <p>عرض وتعديل معلوماتك الشخصية، وإحصائياتك ونبذتك.</p>
+      </a>
+      
+      <a href="library.html" class="account-card">
+        <i class="ph ph-cards"></i>
+        <h3>مجموعاتي</h3>
+        <p>إدارة المجاميع التي أنشأتها وتعديل استراتيجياتك.</p>
+      </a>
+      
+      <a href="favorites.html" class="account-card">
+        <i class="ph ph-star"></i>
+        <h3>المفضلة</h3>
+        <p>الوصول السريع للكروت التي قمت بحفظها كمفضلة.</p>
+      </a>
+      
+      <a href="friends.html" class="account-card">
+        <i class="ph ph-users"></i>
+        <h3>الأصدقاء</h3>
+        <p>إدارة طلبات الصداقة وقائمة أصدقائك في اللعبة.</p>
+      </a>
+      
+      <a href="notifications.html" class="account-card">
+        <i class="ph ph-bell"></i>
+        <h3>الإشعارات</h3>
+        <p>عرض التنبيهات وطلبات الصداقة والدعوات الجديدة.</p>
+      </a>
+      
+      <a href="settings.html" class="account-card">
+        <i class="ph ph-gear"></i>
+        <h3>الإعدادات</h3>
+        <p>التحكم في الأمان وكلمة المرور وتفضيلات الحساب.</p>
+      </a>
+    </div>
+  </main>
+
+  <script type="module" src="js/firebase-config.js"></script>
+  <script type="module" src="js/account.js"></script>
+</body>
+</html>

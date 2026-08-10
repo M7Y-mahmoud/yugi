@@ -45,29 +45,261 @@ a:hover {
 
 
 /* =========================================
+   شريط الملاحة العلوي (Top Navbar)
+========================================= */
+.top-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 65px;
+  background: rgba(18, 12, 8, 0.94);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+}
+
+.navbar-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.navbar-logo {
+  height: 40px;
+  object-fit: contain;
+}
+
+.navbar-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.navbar-nav-links a {
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.navbar-nav-links a:hover,
+.navbar-nav-links a.active {
+  color: var(--gold-bright);
+  background: rgba(212, 175, 55, 0.12);
+}
+
+.navbar-user-area {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.btn-top-login {
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--gold-bright);
+  border: 1px solid var(--gold-primary);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-family: var(--font-arabic);
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  clip-path: none;
+  transition: all 0.2s ease;
+}
+
+.btn-top-login:hover {
+  background: var(--gold-primary);
+  color: var(--bg-void);
+  transform: translateY(-2px);
+}
+
+/* User Dropdown */
+.user-dropdown-container {
+  position: relative;
+}
+
+.dropdown-trigger {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 25px;
+  padding: 4px 14px 4px 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  clip-path: none;
+  transition: all 0.2s ease;
+  color: var(--text-primary);
+}
+
+.dropdown-trigger:hover {
+  border-color: var(--gold-primary);
+  background: rgba(212, 175, 55, 0.12);
+}
+
+.nav-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold-primary);
+  object-fit: cover;
+  background: var(--bg-panel);
+}
+
+.nav-username {
+  font-family: var(--font-arabic);
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--gold-bright);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-notif-badge {
+  background: #e74c3c;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1px solid var(--gold-bright);
+  line-height: 1;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  width: 220px;
+  background: rgba(22, 16, 12, 0.98);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 12px;
+  padding: 8px 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85);
+  display: none;
+  flex-direction: column;
+  z-index: 1200;
+  backdrop-filter: blur(10px);
+}
+
+.dropdown-menu.active {
+  display: flex;
+}
+
+.dropdown-menu a,
+.dropdown-menu button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 18px;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-family: var(--font-arabic);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: right;
+  width: 100%;
+  box-sizing: border-box;
+  clip-path: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+.dropdown-menu a i,
+.dropdown-menu button i {
+  color: var(--gold-primary);
+  font-size: 1.1rem;
+}
+
+.dropdown-menu a:hover,
+.dropdown-menu button:hover {
+  background: rgba(212, 175, 55, 0.15);
+  color: var(--gold-bright);
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: rgba(212, 175, 55, 0.2);
+  margin: 6px 0;
+}
+
+.dropdown-logout-btn {
+  color: #e74c3c !important;
+}
+
+.dropdown-logout-btn i {
+  color: #e74c3c !important;
+}
+
+.badge-count {
+  background: #e74c3c;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+  .navbar-nav-links {
+    display: none;
+  }
+}
+
+/* =========================================
    زر الهمبرغر العائم
 ========================================= */
 .floating-hamburger {
   position: fixed;
-  top: 20px;
-  right: 20px; /* موجود في اليمين لأن الموقع عربي (RTL) */
-  width: 50px;
-  height: 50px;
-  background: rgba(22, 16, 12, 0.85); /* خلفية داكنة تناسب الموقع */
+  top: 10px;
+  right: 15px;
+  width: 44px;
+  height: 44px;
+  background: rgba(22, 16, 12, 0.85);
   border: 1px solid var(--gold-primary);
   color: var(--gold-primary);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
+  font-size: 24px;
   cursor: pointer;
   z-index: 1100;
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
   transition: all 0.3s ease;
-  clip-path: none; /* لإلغاء القص المائل الافتراضي للأزرار في موقعك */
+  clip-path: none;
   padding: 0;
 }
 
@@ -78,21 +310,13 @@ a:hover {
   box-shadow: 0 0 15px rgba(255, 209, 0, 0.3);
 }
 
-/* تعديل المسافة العلوية للصفحة بعد إزالة النافبار */
 body {
-  padding-top: 60px; /* تم تقليلها لأن النافبار اختفى */
+  padding-top: 80px;
 }
 
 @media (max-width: 768px) {
   body {
-    padding-top: 60px;
-  }
-  .floating-hamburger {
-    top: 15px;
-    right: 15px;
-    width: 45px;
-    height: 45px;
-    font-size: 24px;
+    padding-top: 75px;
   }
 }
 
