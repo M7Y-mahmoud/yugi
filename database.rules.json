@@ -50,7 +50,7 @@
     },
 
     "users": {
-      ".read": "auth != null",
+      ".read": true,
       ".indexOn": ["username"],
       "$uid": {
         ".write": "auth != null && auth.uid === $uid"
@@ -59,14 +59,15 @@
 
     "decks": {
       "$deckId": {
-        ".read": "auth != null && (data.child('ownerId').val() === auth.uid || data.child('visibility').val() === 'public' || !data.exists())",
+        ".read": "true",
         ".write": "auth != null && (!data.exists() || data.child('ownerId').val() === auth.uid)"
       }
     },
 
     "favorites": {
+      ".read": true,
       "$uid": {
-        ".read": "auth != null && auth.uid === $uid",
+        ".read": true,
         ".write": "auth != null && auth.uid === $uid"
       }
     },
@@ -81,10 +82,11 @@
     },
 
     "friends": {
+      ".read": true,
       "$uid": {
-        ".read": "auth != null && auth.uid === $uid",
+        ".read": true,
         "$friendUid": {
-          ".read": "auth != null && (auth.uid === $uid || auth.uid === $friendUid)",
+          ".read": true,
           ".write": "auth != null && (auth.uid === $uid || auth.uid === $friendUid)"
         }
       }
@@ -101,14 +103,25 @@
     },
 
     "chats": {
+      ".read": true,
+      ".write": "auth != null",
       "$chatId": {
-        ".read": "auth != null",
+        ".read": true,
+        ".write": "auth != null"
+      }
+    },
+
+    "userGroups": {
+      ".read": true,
+      ".write": "auth != null",
+      "$uid": {
+        ".read": true,
         ".write": "auth != null"
       }
     },
 
     "presence": {
-      ".read": "auth != null",
+      ".read": true,
       "$uid": {
         ".write": "auth != null && auth.uid === $uid"
       }
