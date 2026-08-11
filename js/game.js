@@ -72,6 +72,7 @@ let activeGraveIndex = null;
 let activeDeckIndex = null;
 let isHandHidden = false;
 let matchStarted = false;
+let lifePoints = 4000;
 
 function saveGameState() {
   try {
@@ -82,7 +83,8 @@ function saveGameState() {
       monsterZone,
       spellZone,
       isHandHidden,
-      matchStarted
+      matchStarted,
+      lifePoints
     };
     sessionStorage.setItem(STATE_STORAGE_KEY, JSON.stringify(state));
   } catch (e) {
@@ -103,6 +105,7 @@ function loadSavedGameState() {
       spellZone = parsed.spellZone || [null, null, null, null, null];
       isHandHidden = !!parsed.isHandHidden;
       matchStarted = !!parsed.matchStarted;
+      lifePoints = typeof parsed.lifePoints === 'number' ? parsed.lifePoints : 4000;
       return true;
     }
   } catch (e) {
@@ -164,6 +167,7 @@ async function initGame() {
     monsterZone = [null, null, null, null, null];
     spellZone = [null, null, null, null, null];
     matchStarted = false;
+    lifePoints = 4000;
 
     if (shuffleStartBtn) {
       shuffleStartBtn.innerHTML = '<i class="ph ph-shuffle"></i> خلط ولعب';
@@ -189,6 +193,38 @@ async function initGame() {
   if (drawCardBtn) drawCardBtn.addEventListener('click', drawCard);
   if (toggleHandBtn) toggleHandBtn.addEventListener('click', toggleHandVisibility);
   
+  // Setup LP controls
+  const lpInput = document.getElementById('lp-input');
+  const lpMinusBtn = document.getElementById('lp-minus-btn');
+  const lpPlusBtn = document.getElementById('lp-plus-btn');
+
+  if (lpInput) {
+    lpInput.value = lifePoints;
+    lpInput.addEventListener('change', (e) => {
+      let val = parseInt(e.target.value);
+      if (isNaN(val)) val = 0;
+      lifePoints = val;
+      e.target.value = lifePoints;
+      saveGameState();
+    });
+  }
+
+  if (lpMinusBtn) {
+    lpMinusBtn.addEventListener('click', () => {
+      lifePoints -= 100;
+      if (lpInput) lpInput.value = lifePoints;
+      saveGameState();
+    });
+  }
+
+  if (lpPlusBtn) {
+    lpPlusBtn.addEventListener('click', () => {
+      lifePoints += 100;
+      if (lpInput) lpInput.value = lifePoints;
+      saveGameState();
+    });
+  }
+
   if (graveyardPileVisual) {
     graveyardPileVisual.addEventListener('click', (e) => {
       e.stopPropagation();

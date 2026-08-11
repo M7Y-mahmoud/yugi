@@ -48,6 +48,96 @@ body.game-page {
   white-space: nowrap !important;
 }
 
+/* عداد نقاط الحياة */
+.lp-tracker {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid var(--gold-muted) !important;
+  padding: 4px 8px !important;
+  border-radius: 8px !important;
+  margin-left: 10px !important;
+  margin-right: 10px !important;
+}
+
+.lp-label {
+  color: #ef4444 !important;
+  font-weight: bold !important;
+  font-size: 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  font-family: var(--font-heading) !important;
+}
+
+.lp-input {
+  width: 65px !important;
+  background: transparent !important;
+  border: none !important;
+  color: var(--text-cream) !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  text-align: center !important;
+  font-family: var(--font-heading) !important;
+  outline: none !important;
+  -moz-appearance: textfield !important;
+}
+.lp-input::-webkit-outer-spin-button,
+.lp-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.lp-btn {
+  background: rgba(212, 175, 55, 0.15) !important;
+  border: 1px solid var(--gold-muted) !important;
+  color: var(--gold-bright) !important;
+  border-radius: 4px !important;
+  padding: 2px 6px !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  font-weight: bold !important;
+  transition: all 0.2s ease !important;
+}
+
+.lp-btn:hover {
+  background: var(--gold-primary) !important;
+  color: #120c08 !important;
+}
+
+@media screen and (max-width: 768px) {
+  .game-side-header {
+    right: 5px !important;
+    left: 5px !important;
+    top: 5px !important;
+    padding: 6px !important;
+  }
+  .game-side-container {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 6px !important;
+  }
+  .game-side-header .game-page-title {
+    display: none !important;
+  }
+  .lp-tracker {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 2px 4px !important;
+  }
+  .lp-label {
+    font-size: 12px !important;
+  }
+  .lp-input {
+    width: 50px !important;
+    font-size: 14px !important;
+  }
+}
+
 .game-side-header .new-game-side-btn {
   background: linear-gradient(135deg, rgba(255, 209, 0, 0.25), rgba(200, 150, 40, 0.15)) !important;
   border: 1px solid var(--gold-primary) !important;
