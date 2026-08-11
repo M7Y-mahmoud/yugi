@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تسجيل الدخول - أساطير المبارزة</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎴</text></svg>">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/login.css">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+  <!-- خلفية الصفحة -->
+  <div class="login-page-wrapper">
+    <div class="hieroglyph-bg left"></div>
+    <div class="hieroglyph-bg right"></div>
+    
+    <div class="statue-bg left-statue"></div>
+    <div class="statue-bg right-statue"></div>
+    
+    <div class="login-container">
+      <div class="login-box">
+        <div class="login-header">
+          <div class="eye-symbol-wrapper">
+            <svg class="millennium-eye-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="goldGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#ffd700" />
+                  <stop offset="50%" stop-color="#d4af37" />
+                  <stop offset="100%" stop-color="#996515" />
+                </linearGradient>
+              </defs>
+              <filter id="eyeGlow">
+                <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#ffd700" flood-opacity="0.8"/>
+              </filter>
+              <g filter="url(#eyeGlow)">
+                <!-- الهرم الخارجي لعين الألفية -->
+                <polygon points="100,15 175,160 25,160" fill="#110d06" stroke="url(#goldGlow)" stroke-width="4" stroke-linejoin="round"/>
+                <polygon points="100,30 160,150 40,150" fill="rgba(212, 175, 55, 0.08)" stroke="url(#goldGlow)" stroke-width="1.5"/>
+                <!-- عين الألفية التفصيلية (Eye of Anubis) -->
+                <path d="M 50 100 Q 100 60 150 100 Q 100 135 50 100 Z" fill="rgba(255,215,0,0.15)" stroke="url(#goldGlow)" stroke-width="3.5" stroke-linecap="round"/>
+                <circle cx="100" cy="98" r="18" fill="url(#goldGlow)" stroke="#fff" stroke-width="1.5" />
+                <circle cx="100" cy="98" r="8" fill="#110d06" />
+              </g>
+            </svg>
+            <div class="wings-ornament">
+               <svg viewBox="0 0 200 50" xmlns="http://www.w3.org/2000/svg">
+                 <path d="M100 25 Q130 5 190 10 Q160 25 190 40 Q130 45 100 25 M100 25 Q70 5 10 10 Q40 25 10 40 Q70 45 100 25" fill="none" stroke="#d4af37" stroke-width="2"/>
+               </svg>
+            </div>
+          </div>
+          
+          <img src="public/assets/images/logo.png" alt="Yu-Gi-Oh!" class="login-logo">
+          
+          <h2 class="login-title">تسجيل الدخول</h2>
+        </div>
+
+        <div class="login-form-container">
+          <form id="login-form" class="login-form">
+            <div class="input-group">
+              <i class="ph ph-user"></i>
+              <input type="text" id="login-email" placeholder="اسم المستخدم أو البريد الإلكتروني" required>
+            </div>
+            
+            <div class="input-group">
+              <i class="ph ph-lock"></i>
+              <input type="password" id="login-password" placeholder="كلمة المرور" required>
+              <i class="ph ph-eye password-toggle" id="toggle-password"></i>
+            </div>
+            
+            <p id="login-error-msg" class="error-msg"></p>
+            
+            <button type="submit" class="btn-submit">دخول</button>
+          </form>
+          
+          <div class="login-footer">
+            <p>ليس لديك حساب؟ <a href="register.html">إنشاء حساب</a></p>
+            <a href="#" class="forgot-password">هل نسيت كلمة المرور؟</a>
+            
+            <!-- عودة للرئيسية -->
+            <a href="index.html" class="back-home-link" style="display: block; margin-top: 15px; font-size: 0.9rem; color: var(--gold-muted);"><i class="ph ph-arrow-right"></i> العودة للرئيسية</a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- القاعدة الفرعونية للصندوق -->
+      <div class="box-pedestal"></div>
+    </div>
+  </div>
+
+  <!-- Modal استعادة كلمة المرور -->
+  <div id="forgot-password-modal" class="auth-modal-overlay" style="display: none;">
+    <div class="auth-modal-box">
+      <span class="auth-modal-close">&times;</span>
+      <h3 style="color: var(--pharaoh-gold); margin-top: 0;">استعادة كلمة المرور</h3>
+      <p style="color: var(--text-cream); font-size: 0.9rem; margin-bottom: 20px;">أدخل بريدك الإلكتروني وسنقوم بإرسال رابط آمن لإعادة تعيين كلمة المرور الخاصة بك.</p>
+      <form id="forgot-password-form">
+        <div class="input-group">
+          <i class="ph ph-envelope"></i>
+          <input type="email" id="forgot-email-input" placeholder="البريد الإلكتروني" required>
+        </div>
+        <p id="forgot-error-msg" class="error-msg" style="margin-top: 10px;"></p>
+        <p id="forgot-success-msg" style="color: #4ade80; font-size: 0.9rem; text-align: center; display: none; margin-top: 10px;"></p>
+        <button type="submit" class="btn-submit" style="width: 100%; margin-top: 15px;">إرسال رابط الاستعادة</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="js/login.js"></script>
+</body>
+</html>

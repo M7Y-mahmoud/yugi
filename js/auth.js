@@ -1,4 +1,4 @@
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged, EmailAuthProvider, reauthenticateWithCredential, updatePassword, updateEmail, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged, EmailAuthProvider, reauthenticateWithCredential, updatePassword, updateEmail, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { ref, get, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { auth, db } from "./firebase-config.js";
 import { logActivity } from "./activity-log.js";
@@ -173,15 +173,17 @@ export function handleAuthError(error) {
  * @param {string} email 
  * @param {string} password 
  */
-export async function registerUser(email, password) {
+export async function registerUser(email, password, username = null) {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     
+    const finalUsername = username && username.trim() !== '' ? username.trim() : email.split('@')[0];
+    
     // إنشاء الملف الشخصي الأساسي
     const userRef = ref(db, `users/${user.uid}`);
     await set(userRef, {
-      username: email.split('@')[0],
+      username: finalUsername,
       email: email,
       avatarUrl: `https://api.dicebear.com/9.x/adventurer/svg?seed=${user.uid}`,
       bio: '',
@@ -214,6 +216,14 @@ export async function loginUser(email, password) {
     await set(userRef, serverTimestamp());
     
     return userCredential;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function resetPassword(email) {
+  try {
+    await sendPasswordResetEmail(auth, email);
   } catch (error) {
     throw error;
   }

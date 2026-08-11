@@ -213,9 +213,7 @@ function setupAuthStateListener() {
 
       // Login trigger for guests
       const openLoginModal = () => {
-        ensureAuthModalExists();
-        const authModal = document.getElementById('auth-modal');
-        if (authModal) authModal.style.display = 'block';
+        window.location.href = 'login.html';
       };
 
       if (topLoginBtn) topLoginBtn.onclick = openLoginModal;
@@ -261,72 +259,3 @@ function setupNotificationsCounter(uid) {
   });
 }
 
-/**
- * Dynamically injects Auth Modal if missing
- */
-function ensureAuthModalExists() {
-  if (document.getElementById('auth-modal')) return;
-
-  const modalHtml = `
-    <div id="auth-modal" class="modal" style="display: none;">
-      <div class="modal-content">
-        <span class="close-btn" id="close-auth-modal">&times;</span>
-        <h2>تسجيل الدخول / إنشاء حساب</h2>
-        <form id="auth-form">
-          <input type="email" id="auth-email" placeholder="البريد الإلكتروني" required class="form-control" style="margin-bottom: 10px;">
-          <input type="password" id="auth-password" placeholder="كلمة المرور" required class="form-control" style="margin-bottom: 15px;">
-          <div style="display: flex; gap: 10px;">
-            <button type="submit" id="auth-login-btn" style="flex: 1;">دخول</button>
-            <button type="button" id="auth-register-btn" style="flex: 1; background: rgba(212, 175, 55, 0.2); color: var(--gold-bright);">تسجيل جديد</button>
-          </div>
-          <p id="auth-error" style="color: #e74c3c; margin-top: 10px; font-size: 0.9rem;"></p>
-        </form>
-      </div>
-    </div>
-  `;
-
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-  const authModal = document.getElementById('auth-modal');
-  const closeBtn = document.getElementById('close-auth-modal');
-  const authForm = document.getElementById('auth-form');
-  const authEmail = document.getElementById('auth-email');
-  const authPassword = document.getElementById('auth-password');
-  const authRegisterBtn = document.getElementById('auth-register-btn');
-  const authError = document.getElementById('auth-error');
-
-  if (closeBtn) {
-    closeBtn.onclick = () => {
-      authModal.style.display = 'none';
-    };
-  }
-
-  if (authForm) {
-    authForm.onsubmit = async (e) => {
-      e.preventDefault();
-      authError.textContent = '';
-      try {
-        await signInWithEmailAndPassword(auth, authEmail.value.trim(), authPassword.value);
-        authModal.style.display = 'none';
-      } catch (err) {
-        authError.textContent = 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
-      }
-    };
-  }
-
-  if (authRegisterBtn) {
-    authRegisterBtn.onclick = async () => {
-      authError.textContent = '';
-      if (!authEmail.value || !authPassword.value) {
-        authError.textContent = 'يرجى إدخال البريد الإلكتروني وكلمة المرور.';
-        return;
-      }
-      try {
-        await createUserWithEmailAndPassword(auth, authEmail.value.trim(), authPassword.value);
-        authModal.style.display = 'none';
-      } catch (err) {
-        authError.textContent = err.message || 'حدث خطأ أثناء التسجيل.';
-      }
-    };
-  }
-}

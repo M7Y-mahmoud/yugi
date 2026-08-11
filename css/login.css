@@ -1,0 +1,384 @@
+/* 
+  صفحة تسجيل الدخول - الطابع الفرعوني
+*/
+:root {
+  --pharaoh-gold: #ffd700;
+  --pharaoh-gold-dark: #d4af37;
+  --pharaoh-gold-muted: #996515;
+  --stone-bg: #110d06;
+  --stone-border: #1a150c;
+  --magic-blue: #00b4d8;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: #080603; /* خلفية داكنة جداً */
+  font-family: var(--font-body), sans-serif;
+  overflow-x: hidden;
+}
+
+.login-page-wrapper {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at center, #1a150c 0%, #050402 100%);
+}
+
+/* النقوش الهيروغليفية الخافتة */
+.hieroglyph-bg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 150px;
+  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 200" xmlns="http://www.w3.org/2000/svg"><text x="10" y="30" fill="rgba(212,175,55,0.03)" font-size="20">𓀀</text><text x="60" y="70" fill="rgba(212,175,55,0.03)" font-size="20">𓁹</text><text x="20" y="120" fill="rgba(212,175,55,0.03)" font-size="20">𓃭</text><text x="70" y="160" fill="rgba(212,175,55,0.03)" font-size="20">𓅓</text></svg>');
+  background-repeat: repeat-y;
+  background-size: 100px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hieroglyph-bg.left { left: 5%; }
+.hieroglyph-bg.right { right: 5%; transform: scaleX(-1); }
+
+/* تماثيل فرعونية في الخلفية (أبيس / حراس) */
+.statue-bg {
+  position: absolute;
+  bottom: -50px;
+  width: 250px;
+  height: 600px;
+  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 500" xmlns="http://www.w3.org/2000/svg"><path d="M100 100 Q150 150 120 400 L80 400 Q50 150 100 100" fill="rgba(20,15,10,0.8)" stroke="rgba(212,175,55,0.1)" stroke-width="2"/><circle cx="100" cy="80" r="30" fill="rgba(20,15,10,0.8)" stroke="rgba(212,175,55,0.1)" stroke-width="2"/></svg>');
+  background-repeat: no-repeat;
+  background-position: bottom center;
+  background-size: contain;
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 1;
+}
+.statue-bg.left-statue { left: 10%; }
+.statue-bg.right-statue { right: 10%; transform: scaleX(-1); }
+
+/* صندوق الدخول */
+.login-container {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 900px;
+  padding: 0 20px;
+  animation: fadeInBox 1s ease-out;
+}
+
+@keyframes fadeInBox {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.login-box {
+  background: linear-gradient(180deg, #18130a 0%, #0d0a05 100%);
+  border: 2px solid var(--pharaoh-gold-dark);
+  border-radius: 12px;
+  padding: 40px;
+  position: relative;
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.15), inset 0 0 20px rgba(0, 0, 0, 0.8);
+  /* إطار فرعوني */
+  border-image: linear-gradient(to bottom, #ffd700, #996515, #ffd700) 1;
+  display: flex;
+  flex-direction: column;
+}
+
+@media screen and (min-width: 768px) {
+  .login-box {
+    flex-direction: row;
+    align-items: center;
+    gap: 40px;
+  }
+  .login-header {
+    flex: 1;
+    margin-bottom: 0;
+    padding-right: 20px;
+    border-left: 1px solid rgba(212, 175, 55, 0.2);
+  }
+  .login-form-container {
+    flex: 1;
+    padding-left: 20px;
+  }
+}
+
+/* زوايا الصندوق */
+.login-box::before, .login-box::after {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--pharaoh-gold);
+  z-index: 11;
+}
+.login-box::before {
+  top: -5px;
+  left: -5px;
+  border-right: none;
+  border-bottom: none;
+}
+.login-box::after {
+  bottom: -5px;
+  right: -5px;
+  border-left: none;
+  border-top: none;
+}
+
+/* القاعدة السفلية (Pedestal) */
+.box-pedestal {
+  height: 20px;
+  background: linear-gradient(90deg, #0d0a05, #1a150c, #0d0a05);
+  border: 1px solid var(--pharaoh-gold-muted);
+  border-top: none;
+  margin: 0 20px;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 10px 15px rgba(0,0,0,0.8);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.eye-symbol-wrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.millennium-eye-svg {
+  width: 80px;
+  height: 80px;
+  z-index: 2;
+  filter: drop-shadow(0 0 10px rgba(212,175,55,0.4));
+  animation: pulseGlow 3s infinite alternate;
+}
+
+@keyframes pulseGlow {
+  0% { filter: drop-shadow(0 0 5px rgba(212,175,55,0.4)); }
+  100% { filter: drop-shadow(0 0 15px rgba(255,215,0,0.8)); }
+}
+
+.wings-ornament {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 180px;
+  z-index: 1;
+  opacity: 0.6;
+}
+
+.login-logo {
+  max-width: 180px;
+  margin: -10px auto 10px;
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+}
+
+.login-title {
+  color: var(--pharaoh-gold);
+  font-family: var(--font-heading), serif;
+  font-size: 1.8rem;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+/* الحقول (Inputs) */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-group {
+  position: relative;
+}
+
+.input-group i {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--pharaoh-gold-dark);
+  font-size: 1.2rem;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 15px 45px 15px 15px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--pharaoh-gold-muted);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--pharaoh-gold);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+  background: rgba(20, 15, 10, 0.8);
+}
+
+.password-toggle {
+  left: 15px;
+  right: auto !important;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.password-toggle:hover {
+  color: var(--pharaoh-gold);
+}
+
+.btn-submit {
+  background: linear-gradient(135deg, var(--pharaoh-gold), var(--pharaoh-gold-dark));
+  color: #110d06;
+  border: 2px solid #fff3a1;
+  padding: 14px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  font-family: var(--font-heading), serif;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+  margin-top: 10px;
+  text-shadow: 0 1px 1px rgba(255,255,255,0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-submit::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transform: skewX(-20deg);
+  transition: all 0.5s ease;
+}
+
+.btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+  background: linear-gradient(135deg, #ffe033, #e6c200);
+}
+
+.btn-submit:hover::after {
+  left: 150%;
+}
+
+.error-msg {
+  color: #ef4444;
+  font-size: 0.9rem;
+  margin: -10px 0 0 0;
+  text-align: center;
+  min-height: 20px;
+}
+
+/* الروابط السفلية */
+.login-footer {
+  text-align: center;
+  margin-top: 25px;
+  font-size: 0.95rem;
+  border-top: 1px solid rgba(212, 175, 55, 0.2);
+  padding-top: 20px;
+}
+
+.login-footer p {
+  color: var(--text-cream);
+  margin: 0 0 10px 0;
+}
+
+.login-footer a {
+  color: var(--pharaoh-gold);
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.2s, text-shadow 0.2s;
+}
+
+.login-footer a:hover {
+  color: #fff;
+  text-shadow: 0 0 8px var(--pharaoh-gold);
+}
+
+.forgot-password {
+  font-size: 0.85rem;
+  color: var(--pharaoh-gold-muted) !important;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+  .hieroglyph-bg, .statue-bg {
+    display: none;
+  }
+  .login-box {
+    padding: 30px 20px;
+  }
+  .login-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* Modal استعادة كلمة المرور */
+.auth-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.auth-modal-box {
+  background: linear-gradient(180deg, #18130a 0%, #0d0a05 100%);
+  border: 2px solid var(--pharaoh-gold-dark);
+  border-radius: 8px;
+  padding: 30px;
+  width: 90%;
+  max-width: 400px;
+  position: relative;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+}
+
+.auth-modal-close {
+  position: absolute;
+  top: 10px;
+  left: 15px;
+  color: var(--pharaoh-gold-muted);
+  font-size: 24px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.auth-modal-close:hover {
+  color: var(--pharaoh-gold);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
