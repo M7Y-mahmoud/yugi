@@ -381,6 +381,7 @@ body {
 }
 
 .side-logo {
+  cursor: pointer;
   height: 45px;
 }
 

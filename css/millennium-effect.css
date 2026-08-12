@@ -1,0 +1,80 @@
+/* Millennium Eye Golden Flash Effect */
+.millennium-flash-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 99999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+}
+
+.millennium-flash-overlay.active {
+  animation: pharaohFlash 1.5s ease-out forwards;
+}
+
+.millennium-eye-symbol {
+  width: auto;
+  height: auto;
+  max-width: 400px;
+  max-height: 400px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 20px #ffd700) drop-shadow(0 0 50px #ff0000);
+  transform: scale(0);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.millennium-flash-overlay.active .millennium-eye-symbol {
+  animation: eyePop 1.5s ease-out forwards;
+}
+
+@keyframes pharaohFlash {
+  0% { 
+    background: rgba(255, 215, 0, 0); 
+    box-shadow: inset 0 0 0px rgba(255, 215, 0, 0);
+    opacity: 0;
+  }
+  15% { 
+    background: rgba(255, 215, 0, 0.8); 
+    box-shadow: inset 0 0 150px #ff8c00;
+    opacity: 1;
+  }
+  30% {
+    background: rgba(255, 215, 0, 0.6);
+  }
+  100% { 
+    background: rgba(0, 0, 0, 1); 
+    box-shadow: inset 0 0 300px #000;
+    opacity: 1;
+  }
+}
+
+@keyframes eyePop {
+  0% {
+    transform: scale(0.2) translateY(50px);
+    opacity: 0;
+  }
+  15% {
+    transform: scale(1.5) translateY(0);
+    opacity: 1;
+  }
+  25% {
+    transform: scale(1.2) translateY(0);
+    opacity: 1;
+  }
+  80% {
+    transform: scale(1.4) translateY(0);
+    opacity: 1;
+    filter: drop-shadow(0 0 40px #ffd700) drop-shadow(0 0 80px #ff8c00);
+  }
+  100% {
+    transform: scale(3) translateY(0);
+    opacity: 0;
+  }
+}

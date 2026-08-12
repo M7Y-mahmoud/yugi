@@ -65,3 +65,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+import './millennium-effect.js';

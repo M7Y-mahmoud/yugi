@@ -259,3 +259,4 @@ function setupNotificationsCounter(uid) {
   });
 }
 
+import { attachMillenniumEffect } from './millennium-effect.js';

@@ -881,3 +881,4 @@ function updateGameFavButton(cardId) {
     }
   });
 }
+import './millennium-effect.js';
