@@ -1,7 +1,7 @@
 import { setupCardPreview } from "./card-preview.js";
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { ref, onValue, remove, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { ref, onValue, remove, set, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const userWelcome = document.getElementById('user-welcome');
 const userLogoutBtn = document.getElementById('user-logout-btn');
@@ -90,6 +90,62 @@ function init() {
   
   replaceSearchInput.addEventListener('input', renderReplaceCards);
   replaceTypeFilter.addEventListener('change', renderReplaceCards);
+
+  const playRandomBtn = document.getElementById('play-random-deck-btn');
+  if (playRandomBtn) {
+    playRandomBtn.addEventListener('click', async () => {
+      try {
+        playRandomBtn.disabled = true;
+        playRandomBtn.innerHTML = '<i class="ph ph-spinner ph-spin" style="font-size: 1.4rem;"></i><span>جاري تجهيز 60 كارت عشوائي...</span>';
+
+        if (allCardsArray.length === 0) {
+          const snapshot = await get(ref(db, 'cards'));
+          if (snapshot.exists()) {
+            allCardsData = snapshot.val() || {};
+            allCardsArray = Object.keys(allCardsData).map(key => ({ id: key, ...allCardsData[key] }));
+          }
+        }
+
+        const cardIds = allCardsArray.map(c => c.id);
+        if (cardIds.length === 0) {
+          alert('عذراً، لم يتم العثور على بطاقات في قاعدة البيانات لتجهيز المجموعة العشوائية.');
+          playRandomBtn.disabled = false;
+          playRandomBtn.innerHTML = '<i class="ph ph-lightning" style="font-size: 1.4rem;"></i><span>ابدأ المبارزة بعشوائية</span>';
+          return;
+        }
+
+        // Build candidate pool with up to 3 copies per card
+        let candidatePool = [];
+        cardIds.forEach(id => {
+          candidatePool.push(id, id, id);
+        });
+
+        // Fisher-Yates random shuffle for 100% variety every single time
+        for (let i = candidatePool.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [candidatePool[i], candidatePool[j]] = [candidatePool[j], candidatePool[i]];
+        }
+
+        let randomDeck = candidatePool.slice(0, 60);
+
+        while (randomDeck.length < 60 && cardIds.length > 0) {
+          const randomPick = cardIds[Math.floor(Math.random() * cardIds.length)];
+          randomDeck.push(randomPick);
+        }
+
+        sessionStorage.removeItem('yugioh_game_full_state');
+        sessionStorage.setItem('ygo_deck', JSON.stringify(randomDeck));
+        sessionStorage.setItem('ygo_is_random_deck', 'true');
+
+        window.location.href = 'game.html';
+      } catch (err) {
+        console.error("Error generating random deck:", err);
+        alert('حدث خطأ أثناء تجهيز المجموعة العشوائية.');
+        playRandomBtn.disabled = false;
+        playRandomBtn.innerHTML = '<i class="ph ph-lightning" style="font-size: 1.4rem;"></i><span>ابدأ المبارزة بعشوائية</span>';
+      }
+    });
+  }
 }
 
 function updateEditCountUI() {

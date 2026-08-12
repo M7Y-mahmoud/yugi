@@ -96,8 +96,61 @@ function init() {
 
   searchInput.addEventListener('input', filterCards);
   typeFilter.addEventListener('change', filterCards);
-  
-  
+
+  const heroPlayRandomBtn = document.getElementById('hero-play-random-btn');
+  if (heroPlayRandomBtn) {
+    heroPlayRandomBtn.addEventListener('click', async () => {
+      try {
+        heroPlayRandomBtn.disabled = true;
+        heroPlayRandomBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> <span>جاري تجهيز 60 كارت...</span>';
+
+        let cardList = allCards;
+        if (cardList.length === 0) {
+          const snapshot = await dbGet(dbRef(db, 'cards'));
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            cardList = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+          }
+        }
+
+        const cardIds = cardList.map(c => c.id);
+        if (cardIds.length === 0) {
+          alert('عذراً، لم يتم العثور على بطاقات في قاعدة البيانات لتجهيز المجموعة العشوائية.');
+          heroPlayRandomBtn.disabled = false;
+          heroPlayRandomBtn.innerHTML = '<i class="ph ph-shuffle"></i> <span>مجموعة عشوائية (60 ورقة)</span>';
+          return;
+        }
+
+        let candidatePool = [];
+        cardIds.forEach(id => {
+          candidatePool.push(id, id, id);
+        });
+
+        for (let i = candidatePool.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [candidatePool[i], candidatePool[j]] = [candidatePool[j], candidatePool[i]];
+        }
+
+        let randomDeck = candidatePool.slice(0, 60);
+
+        while (randomDeck.length < 60 && cardIds.length > 0) {
+          const randomPick = cardIds[Math.floor(Math.random() * cardIds.length)];
+          randomDeck.push(randomPick);
+        }
+
+        sessionStorage.removeItem('yugioh_game_full_state');
+        sessionStorage.setItem('ygo_deck', JSON.stringify(randomDeck));
+        sessionStorage.setItem('ygo_is_random_deck', 'true');
+
+        window.location.href = 'game.html';
+      } catch (err) {
+        console.error("Error generating random deck:", err);
+        alert('حدث خطأ أثناء تجهيز المجموعة العشوائية.');
+        heroPlayRandomBtn.disabled = false;
+        heroPlayRandomBtn.innerHTML = '<i class="ph ph-shuffle"></i> <span>مجموعة عشوائية (60 ورقة)</span>';
+      }
+    });
+  }
 }
 
 function setupAuthUI() {

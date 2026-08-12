@@ -116,11 +116,45 @@ function loadSavedGameState() {
 
 async function initGame() {
   if (newGameBtn) {
-    newGameBtn.addEventListener("click", () => {
-      if(confirm("هل أنت متأكد أنك تريد إنهاء اللعبة الحالية والذهاب لاختيار مجموعة جديدة؟")) {
+    newGameBtn.addEventListener("click", async () => {
+      const isRandomDeck = sessionStorage.getItem('ygo_is_random_deck') === 'true';
+      if (isRandomDeck) {
+        const choice = confirm("هل تريد بدء مبارزة جديدة بمجموعة عشوائية جديدة بالكامل (60 كارت)؟\n\n- اضغط (موافق / OK) لبدء مبارزة بمجموعة عشوائية جديدة.\n- اضغط (إلغاء / Cancel) للعودة إلى صفحة المجموعات.");
+        if (choice) {
+          try {
+            const snapshot = await get(ref(db, 'cards'));
+            if (snapshot.exists()) {
+              const data = snapshot.val();
+              const cardIds = Object.keys(data);
+              let candidatePool = [];
+              cardIds.forEach(id => candidatePool.push(id, id, id));
+              for (let i = candidatePool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [candidatePool[i], candidatePool[j]] = [candidatePool[j], candidatePool[i]];
+              }
+              let randomDeck = candidatePool.slice(0, 60);
+              while (randomDeck.length < 60 && cardIds.length > 0) {
+                randomDeck.push(cardIds[Math.floor(Math.random() * cardIds.length)]);
+              }
+              sessionStorage.removeItem(STATE_STORAGE_KEY);
+              sessionStorage.setItem(DECK_STORAGE_KEY, JSON.stringify(randomDeck));
+              window.location.reload();
+              return;
+            }
+          } catch(e) {
+            console.error("Error generating new random deck on restart:", e);
+          }
+        }
         sessionStorage.removeItem(DECK_STORAGE_KEY);
         sessionStorage.removeItem(STATE_STORAGE_KEY);
+        sessionStorage.removeItem('ygo_is_random_deck');
         window.location.href = "library.html";
+      } else {
+        if(confirm("هل أنت متأكد أنك تريد إنهاء اللعبة الحالية والذهاب لاختيار مجموعة جديدة؟")) {
+          sessionStorage.removeItem(DECK_STORAGE_KEY);
+          sessionStorage.removeItem(STATE_STORAGE_KEY);
+          window.location.href = "library.html";
+        }
       }
     });
   }
