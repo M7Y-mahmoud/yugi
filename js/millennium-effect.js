@@ -14,6 +14,7 @@ export function attachMillenniumEffect() {
   let overlay = document.createElement('div');
   overlay.id = 'millennium-flash-overlay';
   overlay.className = 'millennium-flash-overlay';
+  overlay.style.display = 'none';
   
   // The Logo Image
   overlay.innerHTML = `
@@ -79,6 +80,9 @@ export function attachMillenniumEffect() {
       });
 
       // Trigger visual flash
+      overlay.style.display = 'flex';
+      // Force reflow
+      void overlay.offsetWidth;
       overlay.classList.add('active');
 
       // Redirect after animation
