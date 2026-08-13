@@ -338,8 +338,7 @@ async function initializeAndStartGame(room) {
     },
     turnState: {
       hasDrawnThisTurn: true,
-      hasSummonedThisTurn: false,
-      turnCount: 1
+      hasSummonedThisTurn: false
     },
     logs: [`⚔️ بدأت المبارزة أونلاين بين [${p1Name}] و [${p2Name}]!`]
   };
@@ -440,10 +439,6 @@ function setupEventListeners() {
       alert('ليس دورك الآن! انتظر حتى ينتهي الخصم من دوره.');
       return;
     }
-    if (turnState.turnCount === 1) {
-      alert('اللاعب الأول لا يمكنه سحب ورقة في دوره الأول!');
-      return;
-    }
     if (turnState.hasDrawnThisTurn) {
       alert('لقد قمت بسحب كارت في هذا الدور بالفعل!');
       return;
@@ -475,7 +470,6 @@ function setupEventListeners() {
 
     turnState.hasDrawnThisTurn = false;
     turnState.hasSummonedThisTurn = false;
-    turnState.turnCount = (turnState.turnCount || 1) + 1;
 
     logAction(`⌛ أنهى ${myState.name} دوره! عاد الدور إلى ${oppState.name}.`);
     renderArena();
@@ -601,7 +595,6 @@ function setupLPButtons() {
     pushGameStateToFirebase();
     checkWinConditions();
   });
-
 
   document.getElementById('you-lp-minus-500')?.addEventListener('click', () => {
     const myState = (localPlayerRole === 'P1') ? p1State : p2State;
@@ -817,8 +810,7 @@ function openFieldCardMenu(e, card, idx, owner, zoneType) {
   toggleCtxButton('ctx-change-position', zoneType === 'monster' && isMyTurn);
   toggleCtxButton('ctx-flip-card', card.isSetFaceDown && isMyTurn);
 
-  const isFirstTurn = (turnState.turnCount === 1);
-  const canAttack = zoneType === 'monster' && !card.isSetFaceDown && !card.isDefPos && isMyTurn && !card.hasAttackedThisTurn && !isFirstTurn;
+  const canAttack = zoneType === 'monster' && !card.isSetFaceDown && !card.isDefPos && isMyTurn && !card.hasAttackedThisTurn;
   toggleCtxButton('ctx-attack-monster', canAttack && oppHasMonsters);
   toggleCtxButton('ctx-attack-direct', canAttack && !oppHasMonsters);
 
