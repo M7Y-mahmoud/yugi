@@ -113,15 +113,6 @@
         <button id="lp-plus-btn" class="lp-btn"><i class="ph ph-plus"></i> 100</button>
       </div>
 
-      <!-- Turn & Phase Tracker -->
-      <div class="turn-tracker" style="display: flex; gap: 8px; align-items: center; margin: 0 15px; background: rgba(0, 0, 0, 0.4); padding: 5px 12px; border: 1px solid var(--gold-muted); border-radius: 8px;">
-        <span class="lp-label" style="font-size: 14px;">الدور: <span id="current-turn-display">1</span></span>
-        <button id="next-turn-btn" class="lp-btn" style="padding: 4px 8px; font-size: 12px;" title="الدور التالي"><i class="ph ph-arrow-right"></i></button>
-        <div style="width: 1px; height: 20px; background: rgba(255, 209, 0, 0.3); margin: 0 5px;"></div>
-        <span class="lp-label" id="current-phase-display" style="font-size: 13px; color: #4ade80; width: 60px; text-align: center;">MAIN 1</span>
-        <button id="next-phase-btn" class="lp-btn" style="padding: 4px 8px; font-size: 12px;" title="المرحلة التالية"><i class="ph ph-fast-forward"></i></button>
-      </div>
-
       <button id="new-game-btn" class="login-link new-game-side-btn">
         <i class="ph ph-arrows-clockwise"></i> لعبة جديدة
       </button>
@@ -137,18 +128,9 @@
     <!-- Dueling Field Container -->
     <div class="dueling-field">
       
-      <!-- Left Column: Field Zone & Graveyard -->
+      <!-- Left Column: Graveyard -->
       <div class="field-column side-column left-side">
-        <!-- Field Zone -->
-        <div class="zone-badge" style="margin-bottom: 5px;">
-          <i class="ph ph-globe"></i> منطقة الميدان <i class="ph ph-globe"></i>
-        </div>
-        <div class="field-spell-zone">
-          <div id="field-zone-slot" class="field-slot spell-slot" data-zone="field" data-index="0"></div>
-        </div>
-
-        <!-- Graveyard Zone -->
-        <div class="zone-badge" style="margin-top: 15px;">
+        <div class="zone-badge">
           <i class="ph ph-crown"></i> المقبرة <i class="ph ph-crown"></i>
         </div>
         <div class="graveyard-zone">
@@ -222,7 +204,6 @@
           <button id="shuffle-start-btn" class="action-btn"><i class="ph ph-shuffle"></i> خلط ولعب</button>
           <button id="draw-card-btn" class="action-btn" disabled><i class="ph ph-plus-circle"></i> سحب كارت</button>
           <button id="toggle-hand-btn" class="action-btn"><i class="ph ph-eye-slash"></i> إخفاء اليد</button>
-          <button id="toggle-chain-btn" class="action-btn"><i class="ph ph-list-numbers"></i> سجل السلسلة</button>
         </div>
         <div class="hand-tray">
           <div id="hand-container"></div>
@@ -250,21 +231,6 @@
     <div id="deck-list" class="graveyard-grid"></div>
   </div>
 
-  <!-- Chain Log Panel -->
-  <div id="chain-log-container" class="chain-log-container collapsed">
-    <div class="chain-log-header">
-      <h3><i class="ph ph-list-numbers"></i> سجل السلسلة (Chain Log)</h3>
-      <button id="close-chain-log-btn" class="popover-close-btn">&times;</button>
-    </div>
-    <div id="chain-log-body" class="chain-log-body">
-      <ul id="chain-log-list"></ul>
-    </div>
-    <div class="chain-log-footer">
-      <button id="clear-chain-btn" class="chain-action-btn"><i class="ph ph-trash"></i> تفريغ السجل</button>
-      <button id="resolve-chain-btn" class="chain-action-btn"><i class="ph ph-check-circle"></i> حل السلسلة</button>
-    </div>
-  </div>
-
   <div id="card-details-modal" class="modal">
     <div class="modal-content card-details-content">
       <span class="close-btn" id="close-details-btn">&times;</span>
@@ -280,7 +246,6 @@
     <button id="ctx-set-def"><i class="ph ph-cards"></i> تعيين مقلوب</button>
     <button id="ctx-activate-spell"><i class="ph ph-lightning"></i> تفعيل</button>
     <button id="ctx-set-spell"><i class="ph ph-cards"></i> تعيين مقلوب</button>
-    <button id="ctx-add-to-chain"><i class="ph ph-link"></i> إضافة للسلسلة</button>
     <button id="ctx-send-grave"><i class="ph ph-skull"></i> إلى المقبرة</button>
   </div>
 
@@ -288,7 +253,6 @@
   <div id="field-context-menu" class="context-menu">
     <button id="ctx-field-view-details"><i class="ph ph-eye"></i> معاينة</button>
     <button id="ctx-field-flip-change"><i class="ph ph-arrows-clockwise"></i> تغيير الوضع / كشف</button>
-    <button id="ctx-field-add-to-chain"><i class="ph ph-link"></i> إضافة للسلسلة</button>
     <button id="ctx-field-to-grave"><i class="ph ph-skull"></i> إلى المقبرة</button>
     <button id="ctx-field-to-hand"><i class="ph ph-arrow-u-down-left"></i> إرجاع لليد</button>
   </div>

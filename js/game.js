@@ -64,21 +64,6 @@ const cardDetailsModal = document.getElementById('card-details-modal');
 const closeDetailsBtn = document.getElementById('close-details-btn');
 const cardDetailsBody = document.getElementById('card-details-body');
 
-// Chain Log & Field Zone UI
-const toggleChainBtn = document.getElementById('toggle-chain-btn');
-const chainLogContainer = document.getElementById('chain-log-container');
-const closeChainLogBtn = document.getElementById('close-chain-log-btn');
-const chainLogList = document.getElementById('chain-log-list');
-const clearChainBtn = document.getElementById('clear-chain-btn');
-const resolveChainBtn = document.getElementById('resolve-chain-btn');
-const ctxAddToChainBtn = document.getElementById('ctx-add-to-chain');
-const ctxFieldAddToChainBtn = document.getElementById('ctx-field-add-to-chain');
-const fieldZoneSlotEl = document.getElementById('field-zone-slot');
-const currentTurnDisplay = document.getElementById('current-turn-display');
-const currentPhaseDisplay = document.getElementById('current-phase-display');
-const nextTurnBtn = document.getElementById('next-turn-btn');
-const nextPhaseBtn = document.getElementById('next-phase-btn');
-
 // State tracking
 let activeHandIndex = null;
 let activeHandElement = null;
@@ -89,12 +74,6 @@ let activeDeckIndex = null;
 let isHandHidden = false;
 let matchStarted = false;
 let lifePoints = 4000;
-let currentTurn = 1;
-const PHASES = ["DRAW", "STANDBY", "MAIN 1", "BATTLE", "MAIN 2", "END"];
-let currentPhaseIndex = 2;
-
-let fieldZoneSlot = null; // Stores { card, mode }
-let chainLog = []; // Stores { cardName, ... }
 
 function saveGameState() {
   try {
@@ -104,8 +83,6 @@ function saveGameState() {
       graveyard,
       monsterZone,
       spellZone,
-      fieldZoneSlot,
-      chainLog,
       isHandHidden,
       matchStarted,
       lifePoints
@@ -127,14 +104,9 @@ function loadSavedGameState() {
       graveyard = parsed.graveyard || [];
       monsterZone = parsed.monsterZone || [null, null, null, null, null];
       spellZone = parsed.spellZone || [null, null, null, null, null];
-      fieldZoneSlot = parsed.fieldZoneSlot || null;
-      chainLog = parsed.chainLog || [];
       isHandHidden = !!parsed.isHandHidden;
       matchStarted = !!parsed.matchStarted;
       lifePoints = typeof parsed.lifePoints === 'number' ? parsed.lifePoints : 4000;
-      currentTurn = typeof parsed.currentTurn === 'number' ? parsed.currentTurn : 1;
-      currentPhaseIndex = typeof parsed.currentPhaseIndex === 'number' ? parsed.currentPhaseIndex : 2;
-
       return true;
     }
   } catch (e) {
@@ -238,7 +210,6 @@ async function initGame() {
     if (drawCardBtn) drawCardBtn.disabled = true;
 
     updateUI(false, false);
-    renderChainLog();
   } else {
     if (overlay) overlay.style.display = 'none';
     if (shuffleStartBtn) {
@@ -251,51 +222,11 @@ async function initGame() {
       toggleHandBtn.innerHTML = isHandHidden ? '<i class="ph ph-eye"></i> إظهار اليد' : '<i class="ph ph-eye-slash"></i> إخفاء اليد';
     }
     updateUI(false, false);
-    renderChainLog();
   }
 
   if (shuffleStartBtn) shuffleStartBtn.addEventListener('click', handleShuffleOrStart);
   if (drawCardBtn) drawCardBtn.addEventListener('click', drawCard);
   if (toggleHandBtn) toggleHandBtn.addEventListener('click', toggleHandVisibility);
-  
-  if (toggleChainBtn) {
-    toggleChainBtn.addEventListener('click', () => {
-      chainLogContainer?.classList.toggle('collapsed');
-    });
-  }
-  if (closeChainLogBtn) {
-    closeChainLogBtn.addEventListener('click', () => {
-      chainLogContainer?.classList.add('collapsed');
-    });
-  }
-  if (clearChainBtn) {
-    clearChainBtn.addEventListener('click', () => {
-      if(confirm('هل أنت متأكد من تفريغ سجل السلسلة؟')) {
-        chainLog = [];
-        renderChainLog();
-        saveGameState();
-      }
-    });
-  }
-  if (resolveChainBtn) {
-    resolveChainBtn.addEventListener('click', () => {
-      if(chainLog.length === 0) return;
-      // Animate resolution from bottom to top (LIFO)
-      const items = Array.from(chainLogList.children).reverse();
-      let delay = 0;
-      items.forEach((item, idx) => {
-        setTimeout(() => {
-          item.classList.add('resolving');
-        }, delay);
-        delay += 800;
-      });
-      setTimeout(() => {
-        chainLog = [];
-        renderChainLog();
-        saveGameState();
-      }, delay + 500);
-    });
-  }
   
   // Setup LP controls
   const lpInput = document.getElementById('lp-input');
@@ -445,10 +376,7 @@ function setupContextMenuHandlers() {
     ctxActivateSpellBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       hideAllContextMenus();
-      const card = hand[activeHandIndex];
-      if (!validateCardActivation(card, true)) return;
-      const isField = card && ((card.type || '').toLowerCase().includes('field') || (card.type || '').includes('ميدان'));
-      playCardFromHandToField(isField ? 'field' : 'spell', 'faceup');
+      playCardFromHandToField('spell', 'faceup');
     });
   }
 
@@ -456,36 +384,7 @@ function setupContextMenuHandlers() {
     ctxSetSpellBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       hideAllContextMenus();
-      const card = hand[activeHandIndex];
-      const isField = card && ((card.type || '').toLowerCase().includes('field') || (card.type || '').includes('ميدان'));
-      playCardFromHandToField(isField ? 'field' : 'facedown');
-    });
-  }
-
-  if (ctxAddToChainBtn) {
-    ctxAddToChainBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      hideAllContextMenus();
-      if (activeHandIndex !== null && hand[activeHandIndex]) {
-        addToChainLog(hand[activeHandIndex]);
-      }
-    });
-  }
-
-  if (ctxFieldAddToChainBtn) {
-    ctxFieldAddToChainBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      hideAllContextMenus();
-      if (activeFieldZone && activeFieldIndex !== null) {
-        let slot = null;
-        if (activeFieldZone === 'monster') slot = monsterZone[activeFieldIndex];
-        else if (activeFieldZone === 'spell') slot = spellZone[activeFieldIndex];
-        else if (activeFieldZone === 'field') slot = fieldZoneSlot;
-        
-        if (slot && slot.card) {
-          addToChainLog(slot.card);
-        }
-      }
+      playCardFromHandToField('spell', 'facedown');
     });
   }
 
@@ -504,11 +403,7 @@ function setupContextMenuHandlers() {
       e.stopPropagation();
       hideAllContextMenus();
       if (activeFieldZone && activeFieldIndex !== null) {
-        let slot = null;
-        if (activeFieldZone === 'monster') slot = monsterZone[activeFieldIndex];
-        else if (activeFieldZone === 'spell') slot = spellZone[activeFieldIndex];
-        else if (activeFieldZone === 'field') slot = fieldZoneSlot;
-        
+        const slot = activeFieldZone === 'monster' ? monsterZone[activeFieldIndex] : spellZone[activeFieldIndex];
         if (slot && slot.card) {
           showCardDetails(slot.card);
         }
@@ -521,21 +416,13 @@ function setupContextMenuHandlers() {
       e.stopPropagation();
       hideAllContextMenus();
       if (activeFieldZone && activeFieldIndex !== null) {
-        let slot = null;
-        if (activeFieldZone === 'monster') slot = monsterZone[activeFieldIndex];
-        else if (activeFieldZone === 'spell') slot = spellZone[activeFieldIndex];
-        else if (activeFieldZone === 'field') slot = fieldZoneSlot;
-
+        const zone = activeFieldZone === 'monster' ? monsterZone : spellZone;
+        const slot = zone[activeFieldIndex];
         if (slot) {
           if (activeFieldZone === 'monster') {
             slot.mode = (slot.mode === 'set' || slot.mode === 'def') ? 'atk' : 'def';
           } else {
-            if (slot.mode === 'facedown') {
-              if (!validateCardActivation(slot.card, false)) return;
-              slot.mode = 'faceup';
-            } else {
-              slot.mode = 'facedown';
-            }
+            slot.mode = slot.mode === 'facedown' ? 'faceup' : 'facedown';
           }
           updateUI();
         }
@@ -548,19 +435,11 @@ function setupContextMenuHandlers() {
       e.stopPropagation();
       hideAllContextMenus();
       if (activeFieldZone && activeFieldIndex !== null) {
-        let slot = null;
-        if (activeFieldZone === 'monster') slot = monsterZone[activeFieldIndex];
-        else if (activeFieldZone === 'spell') slot = spellZone[activeFieldIndex];
-        else if (activeFieldZone === 'field') slot = fieldZoneSlot;
-
+        const zone = activeFieldZone === 'monster' ? monsterZone : spellZone;
+        const slot = zone[activeFieldIndex];
         if (slot && slot.card) {
           graveyard.unshift(slot.card);
-          if (activeFieldZone === 'monster') {
-            monsterZone[activeFieldIndex] = null;
-            onMonsterRemoved(activeFieldIndex);
-          }
-          else if (activeFieldZone === 'spell') spellZone[activeFieldIndex] = null;
-          else if (activeFieldZone === 'field') fieldZoneSlot = null;
+          zone[activeFieldIndex] = null;
           updateUI();
         }
       }
@@ -572,19 +451,11 @@ function setupContextMenuHandlers() {
       e.stopPropagation();
       hideAllContextMenus();
       if (activeFieldZone && activeFieldIndex !== null) {
-        let slot = null;
-        if (activeFieldZone === 'monster') slot = monsterZone[activeFieldIndex];
-        else if (activeFieldZone === 'spell') slot = spellZone[activeFieldIndex];
-        else if (activeFieldZone === 'field') slot = fieldZoneSlot;
-
+        const zone = activeFieldZone === 'monster' ? monsterZone : spellZone;
+        const slot = zone[activeFieldIndex];
         if (slot && slot.card) {
           hand.push(slot.card);
-          if (activeFieldZone === 'monster') {
-            monsterZone[activeFieldIndex] = null;
-            onMonsterRemoved(activeFieldIndex);
-          }
-          else if (activeFieldZone === 'spell') spellZone[activeFieldIndex] = null;
-          else if (activeFieldZone === 'field') fieldZoneSlot = null;
+          zone[activeFieldIndex] = null;
           updateUI();
         }
       }
@@ -651,54 +522,19 @@ function setupContextMenuHandlers() {
   }
 }
 
-function getCardTypeInfo(card) {
-   let cardType = "monster";
-   if((card.type || "").toLowerCase().includes("spell") || (card.type || "").includes("سحر")) cardType = "spell";
-   else if((card.type || "").toLowerCase().includes("trap") || (card.type || "").includes("فخ")) cardType = "trap";
-   
-   let subtype = "normal";
-   const race = (card.race || "").toLowerCase();
-   if (cardType === "spell") {
-       if (race === "continuous") subtype = "continuous";
-       else if (race === "equip") subtype = "equip";
-       else if (race === "field") subtype = "field";
-       else if (race === "quick-play") subtype = "quickplay";
-       else if (race === "ritual") subtype = "ritual";
-       else subtype = "normal";
-   } else if (cardType === "trap") {
-       if (race === "continuous") subtype = "continuous_trap";
-       else if (race === "counter") subtype = "counter_trap";
-       else subtype = "normal_trap";
-   }
-   return { cardType, subtype };
-}
-
 function playCardFromHandToField(targetZoneType, mode) {
   if (activeHandIndex === null || !hand[activeHandIndex]) return;
 
   const card = hand[activeHandIndex];
+  const targetZone = targetZoneType === 'monster' ? monsterZone : spellZone;
   
-  const typeInfo = getCardTypeInfo(card);
-  card.cardType = typeInfo.cardType;
-  card.subtype = typeInfo.subtype;
-  card.turnPlacedOn = currentTurn;
-  
-  if (targetZoneType === 'field') {
-    if (fieldZoneSlot !== null) {
-      if(!confirm("توجد بطاقة ميدان بالفعل، هل تريد استبدالها وإرسال الحالية للمقبرة؟")) return;
-      graveyard.unshift(fieldZoneSlot.card);
-    }
-    fieldZoneSlot = { card, mode };
-  } else {
-    const targetZone = targetZoneType === 'monster' ? monsterZone : spellZone;
-    const emptyIndex = targetZone.findIndex(slot => slot === null);
-    if (emptyIndex === -1) {
-      alert(targetZoneType === 'monster' ? "منطقة الوحوش مليئة!" : "منطقة السحر والفخ مليئة!");
-      return;
-    }
-    targetZone[emptyIndex] = { card, mode };
+  const emptyIndex = targetZone.findIndex(slot => slot === null);
+  if (emptyIndex === -1) {
+    alert(targetZoneType === 'monster' ? "منطقة الوحوش مليئة!" : "منطقة السحر والفخ مليئة!");
+    return;
   }
 
+  targetZone[emptyIndex] = { card, mode };
   hand.splice(activeHandIndex, 1);
   activeHandIndex = null;
   updateUI();
@@ -759,7 +595,6 @@ function sendToGraveyard(handIndex) {
 }
 
 function updateUI(isDrawing = false, doSave = true) {
-  updateTurnPhaseUI();
   if (deckCountDisplay) deckCountDisplay.textContent = deckPile.length;
   if (deckPileVisual) {
     if (deckPile.length > 0) {
@@ -849,17 +684,6 @@ function renderHandUI(isDrawing = false) {
 }
 
 function renderFieldSlots() {
-  if (fieldZoneSlotEl) {
-    fieldZoneSlotEl.innerHTML = '';
-    if (fieldZoneSlot && fieldZoneSlot.card) {
-      const cardEl = createFieldCardElement(fieldZoneSlot, 'field', 0);
-      fieldZoneSlotEl.appendChild(cardEl);
-      fieldZoneSlotEl.classList.remove('empty');
-    } else {
-      fieldZoneSlotEl.classList.add('empty');
-    }
-  }
-
   const monsterSlots = document.querySelectorAll('.monster-slot');
   monsterSlots.forEach((slotEl, idx) => {
     slotEl.innerHTML = '';
@@ -1104,142 +928,3 @@ function updateGameFavButton(cardId) {
   });
 }
 import './millennium-effect.js';
-
-function renderChainLog() {
-  if (!chainLogList) return;
-  chainLogList.innerHTML = '';
-  if (chainLog.length === 0) {
-    chainLogList.innerHTML = '<li style="text-align: center; color: #888; font-size: 13px;">السجل فارغ. أضف تأثيرات أثناء اللعب لتتبعها.</li>';
-    return;
-  }
-  
-  chainLog.forEach((log, index) => {
-    const li = document.createElement('li');
-    li.className = 'chain-log-item';
-    li.innerHTML = `
-      <span class="chain-link-number">CL${index + 1}</span>
-      <span>${log.cardName}</span>
-    `;
-    chainLogList.appendChild(li);
-  });
-}
-
-function addToChainLog(card) {
-  if (!card) return;
-  const speed = getSpellSpeed(card);
-  if (chainLog.length > 0) {
-    const top = chainLog[chainLog.length - 1];
-    if (speed < 2) {
-      alert("لا يمكن الرد على سلسلة بكارت سرعته السحرية 1.");
-      return;
-    }
-    if (top.spellSpeed && speed < top.spellSpeed) {
-      alert(`لا يمكنك استخدام كارت سرعته السحرية (${speed}) ردًا على كارت سرعته السحرية (${top.spellSpeed}).`);
-      return;
-    }
-  }
-
-  chainLog.push({ 
-    cardName: card.nameAr || card.nameEn || card.name,
-    spellSpeed: speed 
-  });
-  
-  if (chainLogContainer && chainLogContainer.classList.contains('collapsed')) {
-    chainLogContainer.classList.remove('collapsed'); // Auto-open when something is added
-  }
-  renderChainLog();
-  saveGameState();
-}
-
-function updateTurnPhaseUI() {
-  if (currentTurnDisplay) currentTurnDisplay.textContent = currentTurn;
-  if (currentPhaseDisplay) currentPhaseDisplay.textContent = PHASES[currentPhaseIndex];
-}
-
-
-if (nextTurnBtn) {
-  nextTurnBtn.addEventListener('click', () => {
-    currentTurn++;
-    currentPhaseIndex = 0; // DRAW phase
-    updateUI();
-  });
-}
-
-if (nextPhaseBtn) {
-  nextPhaseBtn.addEventListener('click', () => {
-    currentPhaseIndex = (currentPhaseIndex + 1) % PHASES.length;
-    updateUI();
-  });
-}
-
-const SPELL_SPEED = {
-  normal: 1, continuous: 1, equip: 1, field: 1, ritual: 1,
-  quickplay: 2, normal_trap: 2, continuous_trap: 2,
-  counter_trap: 3,
-  monster_continuous: 1, monster_ignition: 1, monster_trigger: 1, monster_quick: 2
-};
-
-function getSpellSpeed(card) {
-  const info = card.subtype || getCardTypeInfo(card).subtype;
-  return SPELL_SPEED[info] || 1;
-}
-
-function canActivateTrap(card) {
-  if (card.cardType !== "trap") return true;
-  if (card.turnPlacedOn === currentTurn) return false;
-  return true;
-}
-
-function canActivateQuickPlaySpell(card, activatingFromHand) {
-  if (card.cardType !== "spell" || card.subtype !== "quickplay") return true;
-  if (activatingFromHand) return true;
-  if (card.turnPlacedOn === currentTurn) return false;
-  return true;
-}
-
-function canActivateNormalOrRitualSpell(card, activatingFromHand) {
-  if (card.cardType !== "spell") return true;
-  if (card.subtype === "quickplay") return true;
-  if (currentPhaseIndex !== 2 && currentPhaseIndex !== 4) return false; // MAIN 1 or MAIN 2
-  return true;
-}
-
-function validateCardActivation(card, activatingFromHand) {
-  const typeInfo = getCardTypeInfo(card);
-  card.cardType = typeInfo.cardType;
-  card.subtype = typeInfo.subtype;
-
-  if (card.cardType === "trap") {
-    if (activatingFromHand) {
-      alert("لا يمكن تفعيل بطاقة الفخ مباشرة من اليد (إلا بتأثيرات خاصة غير مدعومة حاليًا). يجب وضعها مقلوبة (Set) أولاً.");
-      return false;
-    }
-    if (!canActivateTrap(card)) {
-      alert("لا يمكن تفعيل بطاقة الفخ في نفس الدور الذي تم وضعها فيه (Set).");
-      return false;
-    }
-  } else if (card.cardType === "spell") {
-    if (card.subtype === "quickplay") {
-      if (!canActivateQuickPlaySpell(card, activatingFromHand)) {
-        alert("لا يمكن تفعيل سحر سريع (Quick-Play) في نفس الدور الذي تم وضعه فيه (Set).");
-        return false;
-      }
-    } else {
-      if (!canActivateNormalOrRitualSpell(card, activatingFromHand)) {
-        alert("لا يمكن تفعيل السحر العادي/الطقسي/المستمر/التجهيز إلا في المرحلة الأساسية (Main Phase 1 or 2).");
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-function onMonsterRemoved(monsterZoneIndex) {
-  const monsterId = `monster-${monsterZoneIndex}`;
-  spellZone.forEach((slot, index) => {
-    if (slot && slot.card && slot.card.equippedToMonsterId === monsterId) {
-      graveyard.unshift(slot.card);
-      spellZone[index] = null;
-    }
-  });
-}
