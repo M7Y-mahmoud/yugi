@@ -1,4 +1,5 @@
 import { auth, db } from "./firebase-config.js";
+import { getCardDetailsAr } from "./card-translator.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { ref, get, onValue, set, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { listenUserPresence, formatPresence } from "./presence.js";
@@ -379,12 +380,13 @@ async function openInspectModal(deck, mainCards, extraCards, sideCards) {
 
   allCardIds.forEach(cardId => {
     const cardData = cardsDatabaseCache[cardId] || { name: `كارت #${cardId}`, imageUrl: 'https://via.placeholder.com/100x140?text=Card' };
+    const details = getCardDetailsAr(cardData);
     const cardItem = document.createElement('div');
     cardItem.className = 'inspect-card-item';
 
     cardItem.innerHTML = `
-      <img src="${cardData.imageUrl}" alt="${cardData.name}" class="inspect-card-img" onerror="this.src='https://via.placeholder.com/100x140?text=YGo';">
-      <div class="inspect-card-name" title="${cardData.name}">${cardData.name}</div>
+      <img src="${cardData.imageUrl}" alt="${details.nameAr}" class="inspect-card-img" onerror="this.src='https://via.placeholder.com/100x140?text=YGo';">
+      <div class="inspect-card-name" title="${details.nameAr}">${details.nameAr}</div>
     `;
 
     inspectCardsContainer.appendChild(cardItem);

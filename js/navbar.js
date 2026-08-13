@@ -20,8 +20,8 @@ function initNavbar() {
  */
 function ensureTopNavbarExists() {
   if (document.getElementById('top-navbar')) return;
-  // Do not inject top navbar on the game page
-  if (document.body.classList.contains('game-page') || window.location.pathname.includes('game.html')) return;
+  // Do not inject top navbar on the game page or online-game page
+  if (document.body.classList.contains('game-page') || document.body.classList.contains('online-game-page') || window.location.pathname.includes('game.html')) return;
 
   const navbarHtml = `
     <header id="top-navbar" class="top-navbar">
@@ -33,6 +33,7 @@ function ensureTopNavbarExists() {
         <div class="navbar-nav-links">
           <a href="index.html" id="nav-home-link"><i class="ph ph-house"></i> الرئيسية</a>
           <a href="library.html" id="nav-library-link"><i class="ph ph-cards"></i> البطاقات</a>
+          <a href="online-game.html" id="nav-online-link" style="color:var(--gold-bright); font-weight:bold;"><i class="ph ph-globe-hemisphere-west"></i> لعب أونلاين</a>
         </div>
 
         <div class="navbar-user-area">

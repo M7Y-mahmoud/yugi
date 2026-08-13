@@ -6,8 +6,11 @@ let isPreviewing = false;
 let currentPreviewCardId = null;
 
 export function setupCardPreview(cardElement, cardOrUrl, explicitCardId = null) {
-  let imageUrl = typeof cardOrUrl === 'string' ? cardOrUrl : (cardOrUrl.imageUrl || 'https://via.placeholder.com/220x320?text=No+Image');
-  let cardId = typeof cardOrUrl === 'string' ? explicitCardId : cardOrUrl.id;
+  if (!cardElement) return;
+  let imageUrl = typeof cardOrUrl === 'string' 
+    ? cardOrUrl 
+    : (cardOrUrl?.imageUrl || cardOrUrl?.image || 'https://via.placeholder.com/220x320?text=No+Image');
+  let cardId = typeof cardOrUrl === 'string' ? explicitCardId : cardOrUrl?.id;
 
   
   cardElement.addEventListener('touchstart', (e) => {

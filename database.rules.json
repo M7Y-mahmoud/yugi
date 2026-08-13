@@ -136,8 +136,8 @@
 
     "rooms": {
       "$roomId": {
-        ".read": "auth != null",
-        ".write": "auth != null"
+        ".read": "true",
+        ".write": "true"
       }
     }
   }
