@@ -23,6 +23,7 @@ let localUser = {
 let activeTurn = 'P1'; // 'P1' or 'P2'
 let activePhase = 'MAIN1';
 let allCardsList = [];
+let turnCount = 1;
 
 let turnState = {
   hasDrawnThisTurn: true,
@@ -340,6 +341,7 @@ async function initializeAndStartGame(room) {
       hasDrawnThisTurn: true,
       hasSummonedThisTurn: false
     },
+    turnCount: 1,
     logs: [`⚔️ بدأت المبارزة أونلاين بين [${p1Name}] و [${p2Name}]!`]
   };
 
@@ -459,13 +461,14 @@ function setupEventListeners() {
   // End turn button
   document.getElementById('btn-end-turn')?.addEventListener('click', () => {
     if (activeTurn !== localPlayerRole) {
-      alert('انتظر حتى ينتهي الخصم من دوره!');
+      alert('لا يمكنك إنهاء دور خصمك!');
       return;
     }
     const myState = (localPlayerRole === 'P1') ? p1State : p2State;
     const oppState = (localPlayerRole === 'P1') ? p2State : p1State;
 
     activeTurn = (localPlayerRole === 'P1') ? 'P2' : 'P1';
+    turnCount++;
     myState.monsters.forEach(m => { if (m) m.hasAttackedThisTurn = false; });
 
     turnState.hasDrawnThisTurn = false;
@@ -531,6 +534,7 @@ async function pushGameStateToFirebase() {
     p1State,
     p2State,
     turnState,
+    turnCount,
     lastUpdate: Date.now()
   };
   try {
@@ -544,6 +548,7 @@ function syncGameStateFromRoom(gs) {
   if (!gs) return;
 
   activeTurn = gs.activeTurn || 'P1';
+  turnCount = gs.turnCount || 1;
   if (gs.p1State) Object.assign(p1State, gs.p1State);
   if (gs.p2State) Object.assign(p2State, gs.p2State);
   if (gs.turnState) Object.assign(turnState, gs.turnState);
@@ -649,13 +654,20 @@ function renderArena() {
   // Turn status banner
   const turnBanner = document.getElementById('turn-banner');
   const turnText = document.getElementById('turn-text');
+  const drawBtn = document.getElementById('btn-draw-card');
+  const endTurnBtn = document.getElementById('btn-end-turn');
+  
   if (turnBanner && turnText) {
     if (activeTurn === localPlayerRole) {
       turnBanner.className = 'turn-status-banner your-turn';
       turnText.textContent = `دورك الآن (Your Turn) - [${youState.name}]`;
+      if (drawBtn) drawBtn.disabled = false;
+      if (endTurnBtn) endTurnBtn.disabled = false;
     } else {
       turnBanner.className = 'turn-status-banner opp-turn';
       turnText.textContent = `دور الخصم (Opponent Turn) - [${oppState.name}]`;
+      if (drawBtn) drawBtn.disabled = true;
+      if (endTurnBtn) endTurnBtn.disabled = true;
     }
   }
 
@@ -810,7 +822,7 @@ function openFieldCardMenu(e, card, idx, owner, zoneType) {
   toggleCtxButton('ctx-change-position', zoneType === 'monster' && isMyTurn);
   toggleCtxButton('ctx-flip-card', card.isSetFaceDown && isMyTurn);
 
-  const canAttack = zoneType === 'monster' && !card.isSetFaceDown && !card.isDefPos && isMyTurn && !card.hasAttackedThisTurn;
+  const canAttack = zoneType === 'monster' && !card.isSetFaceDown && !card.isDefPos && isMyTurn && !card.hasAttackedThisTurn && turnCount > 1;
   toggleCtxButton('ctx-attack-monster', canAttack && oppHasMonsters);
   toggleCtxButton('ctx-attack-direct', canAttack && !oppHasMonsters);
 
@@ -852,6 +864,7 @@ function setupContextMenuActions() {
     if (!selectedCardContext) return;
     const { card, idx, owner } = selectedCardContext;
     const player = (owner === 'P1') ? p1State : p2State;
+    const opponent = (owner === 'P1') ? p2State : p1State;
 
     const freeIndex = player.spells.findIndex(s => s === null);
     if (freeIndex === -1) {
@@ -862,6 +875,9 @@ function setupContextMenuActions() {
     player.hand.splice(idx, 1);
     player.spells[freeIndex] = { ...card, isSetFaceDown: false };
     logAction(`⚡ فعّل ${player.name} ورقة [${card.nameAr || card.name}]!`);
+    
+    executeSpellEffect(card, player, opponent, freeIndex);
+
     document.getElementById('online-context-menu').style.display = 'none';
     renderArena();
     pushGameStateToFirebase();
@@ -906,6 +922,7 @@ function setupContextMenuActions() {
     if (!selectedCardContext) return;
     const { card, idx, owner, zoneType } = selectedCardContext;
     const player = (owner === 'P1') ? p1State : p2State;
+    const opponent = (owner === 'P1') ? p2State : p1State;
 
     if (zoneType === 'monster' && player.monsters[idx]) {
       player.monsters[idx].isSetFaceDown = false;
@@ -913,6 +930,7 @@ function setupContextMenuActions() {
     } else if (zoneType === 'spell' && player.spells[idx]) {
       player.spells[idx].isSetFaceDown = false;
       logAction(`⚡ كشف وفعّل ${player.name} الورقة: [${card.nameAr || card.name}]!`);
+      executeSpellEffect(card, player, opponent, idx);
     }
 
     document.getElementById('online-context-menu').style.display = 'none';
@@ -1132,11 +1150,26 @@ function openPileViewer(pileType, owner) {
       cardCard.innerHTML = `
         <img src="${imgUrl}" style="width: 100%; height: 110px; object-fit: cover; border-radius: 4px;">
         <div style="font-size: 0.75rem; color: var(--gold-bright); font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 4px;">${details.nameAr}</div>
-        <div style="font-size: 0.68rem; color: #93c5fd;">${details.typeAr}</div>
+        <div style="font-size: 0.68rem; color: #93c5fd; margin-bottom: 4px;">${details.typeAr}</div>
+        <div style="display: flex; gap: 4px; justify-content: center; flex-wrap: wrap;">
+          <button class="pile-action-btn" data-action="hand" style="font-size:0.65rem; padding: 2px 4px; background: #2563eb; color: #fff; border: none; border-radius: 3px; cursor: pointer;">اليد ✋</button>
+          ${isMonster(card) ? `<button class="pile-action-btn" data-action="summon" style="font-size:0.65rem; padding: 2px 4px; background: #ea580c; color: #fff; border: none; border-radius: 3px; cursor: pointer;">استدعاء ⚔️</button>` : ''}
+        </div>
       `;
 
       cardCard.addEventListener('mouseenter', () => cardCard.style.transform = 'scale(1.05)');
       cardCard.addEventListener('mouseleave', () => cardCard.style.transform = 'scale(1)');
+      
+      // Stop propagation on buttons so they don't trigger the card click
+      cardCard.querySelectorAll('.pile-action-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const action = btn.getAttribute('data-action');
+          handlePileAction(action, card, pileType, owner);
+          modal.style.display = 'none';
+        });
+      });
+
       cardCard.addEventListener('click', () => {
         showCardDetailsModal(card);
       });
@@ -1146,6 +1179,34 @@ function openPileViewer(pileType, owner) {
   }
 
   modal.style.display = 'flex';
+}
+
+function handlePileAction(action, card, pileType, owner) {
+  const player = (owner === 'P1') ? p1State : p2State;
+  const pile = (pileType === 'deck') ? player.deck : player.graveyard;
+  const localPlayer = (localPlayerRole === 'P1') ? p1State : p2State;
+
+  const cardIndex = pile.findIndex(c => c.instanceId === card.instanceId || c.id === card.id);
+  if (cardIndex > -1) {
+    pile.splice(cardIndex, 1);
+  }
+
+  if (action === 'hand') {
+    localPlayer.hand.push(card);
+    logAction(`✨ سحب ${localPlayer.name} ورقة [${card.nameAr || card.name}] من ${pileType === 'deck' ? 'المجموعة' : 'المقبرة'} إلى يده عبر تأثير.`);
+  } else if (action === 'summon') {
+    const freeIndex = localPlayer.monsters.findIndex(m => m === null);
+    if (freeIndex > -1) {
+      localPlayer.monsters[freeIndex] = { ...card, isSetFaceDown: false, isDefPos: false, hasAttackedThisTurn: false };
+      logAction(`🔥 استدعاء خاص للوحش [${card.nameAr || card.name}] من ${pileType === 'deck' ? 'المجموعة' : 'المقبرة'} إلى الساحة!`);
+    } else {
+      localPlayer.hand.push(card);
+      alert('الساحة ممتلئة! تم نقل الورقة إلى يدك.');
+    }
+  }
+
+  renderArena();
+  pushGameStateToFirebase();
 }
 
 function showCardDetailsModal(card) {
@@ -1239,6 +1300,33 @@ function executeMonsterBattle(attacker, attackerOwner, attackerIdx, defender, de
   const defenderName = defender.isSetFaceDown ? 'كارت الوحش المقلوب' : (defender.nameAr || defender.name);
   const attackerName = attacker.nameAr || attacker.name;
 
+  // Check for Mirror Force
+  let mirrorForceIndex = -1;
+  if (defenderPlayer.spells) {
+    mirrorForceIndex = defenderPlayer.spells.findIndex(s => s && s.isSetFaceDown && (s.nameEn?.includes('Mirror Force') || s.name?.includes('Mirror Force')));
+  }
+
+  if (mirrorForceIndex > -1) {
+    const mfCard = defenderPlayer.spells[mirrorForceIndex];
+    mfCard.isSetFaceDown = false;
+    defenderPlayer.graveyard.unshift(mfCard);
+    defenderPlayer.spells[mirrorForceIndex] = null;
+    
+    // Destroy all attack position monsters of attacker
+    attackerPlayer.monsters.forEach((m, i) => {
+      if (m && !m.isDefPos) {
+        attackerPlayer.graveyard.unshift(m);
+        attackerPlayer.monsters[i] = null;
+      }
+    });
+    
+    logAction(`🚨 تفعيل فخ [${mfCard.nameAr || mfCard.name}]! تم تدمير جميع وحوش ${attackerPlayer.name} في وضع الهجوم، وأُبطل الهجوم!`);
+    renderArena();
+    pushGameStateToFirebase();
+    checkWinConditions();
+    return;
+  }
+
   let resultMsg = '';
 
   if (!defender.isDefPos) {
@@ -1293,6 +1381,32 @@ function executeDirectAttack(attacker, attackerOwner, attackerIdx) {
   const attackerPlayer = (attackerOwner === 'P1') ? p1State : p2State;
   const defenderPlayer = (attackerOwner === 'P1') ? p2State : p1State;
 
+  // Check for Mirror Force
+  let mirrorForceIndex = -1;
+  if (defenderPlayer.spells) {
+    mirrorForceIndex = defenderPlayer.spells.findIndex(s => s && s.isSetFaceDown && (s.nameEn?.includes('Mirror Force') || s.name?.includes('Mirror Force')));
+  }
+
+  if (mirrorForceIndex > -1) {
+    const mfCard = defenderPlayer.spells[mirrorForceIndex];
+    mfCard.isSetFaceDown = false;
+    defenderPlayer.graveyard.unshift(mfCard);
+    defenderPlayer.spells[mirrorForceIndex] = null;
+    
+    attackerPlayer.monsters.forEach((m, i) => {
+      if (m && !m.isDefPos) {
+        attackerPlayer.graveyard.unshift(m);
+        attackerPlayer.monsters[i] = null;
+      }
+    });
+    
+    logAction(`🚨 تفعيل فخ [${mfCard.nameAr || mfCard.name}]! تم تدمير جميع وحوش ${attackerPlayer.name} في وضع الهجوم، وأُبطل الهجوم المباشر!`);
+    renderArena();
+    pushGameStateToFirebase();
+    checkWinConditions();
+    return;
+  }
+
   const damage = attacker.atk || 0;
   defenderPlayer.lp = Math.max(0, defenderPlayer.lp - damage);
 
@@ -1328,4 +1442,40 @@ function logAction(msg) {
   entry.innerHTML = `<span class="time">[${timeStr}]</span> <span>${msg}</span>`;
 
   logBox.prepend(entry);
+}
+
+function executeSpellEffect(card, player, opponent, slotIndex) {
+  const cardName = card.nameEn || card.name;
+  if (cardName.includes('Pot of Greed')) {
+    if (player.deck.length > 0) player.hand.push(player.deck.pop());
+    if (player.deck.length > 0) player.hand.push(player.deck.pop());
+    logAction(`✨ تأثير [جرة الطمع]: سحب ${player.name} بطاقتين!`);
+    player.graveyard.unshift(card);
+    player.spells[slotIndex] = null;
+  } else if (cardName.includes('Raigeki')) {
+    opponent.monsters.forEach((m, i) => {
+      if (m) {
+        opponent.graveyard.unshift(m);
+        opponent.monsters[i] = null;
+      }
+    });
+    logAction(`⚡ تأثير [Raigeki]: تم تدمير جميع وحوش ${opponent.name}!`);
+    player.graveyard.unshift(card);
+    player.spells[slotIndex] = null;
+  } else if (cardName.includes('Dark Hole')) {
+    opponent.monsters.forEach((m, i) => { if (m) { opponent.graveyard.unshift(m); opponent.monsters[i] = null; } });
+    player.monsters.forEach((m, i) => { if (m) { player.graveyard.unshift(m); player.monsters[i] = null; } });
+    logAction(`🌌 تأثير [الثقب الأسود]: تم تدمير جميع الوحوش في الملعب!`);
+    player.graveyard.unshift(card);
+    player.spells[slotIndex] = null;
+  } else if (cardName.includes('Monster Reborn')) {
+    logAction(`✨ تأثير [إحياء الوحش]: يمكن لـ ${player.name} اختيار وحش من أي مقبرة (باستخدام زر الاستدعاء من المقبرة).`);
+    player.graveyard.unshift(card);
+    player.spells[slotIndex] = null;
+  } else if (cardName.includes('Swords of Revealing Light')) {
+    opponent.monsters.forEach(m => {
+      if (m && m.isSetFaceDown) m.isSetFaceDown = false;
+    });
+    logAction(`⚔️ تأثير [سيوف النور الكاشفة]: تم كشف جميع وحوش ${opponent.name}!`);
+  }
 }
