@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>لعب أونلاين 1v1 - Yu-Gi-Oh!</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎴</text></svg>">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/online-game.css">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script type="module" src="js/navbar.js"></script>
+</head>
+<body class="online-game-page">
+
+  <!-- Header for Online Arena -->
+  <header class="online-arena-header">
+    <a href="index.html" class="arena-brand">
+      <img src="public/assets/images/logo.png" alt="Yu-Gi-Oh!" class="arena-logo">
+      <h1 class="arena-title"><i class="ph ph-globe-hemisphere-west"></i> حلبة المبارزة أونلاين</h1>
+    </a>
+
+    <div class="arena-room-badge" id="room-id-badge">
+      <i class="ph ph-hash"></i> الغرفة: <span id="room-code-text">ONLINE-8821</span>
+      <button id="copy-room-btn" title="نسخ رابط الغرفة" style="background:none; border:none; color:var(--gold-bright); cursor:pointer; font-size:1.1rem; padding:0 4px;"><i class="ph ph-copy"></i></button>
+    </div>
+
+    <div class="arena-header-actions">
+      <button id="perspective-toggle-btn" class="arena-btn perspective-btn" title="تبديل المنظور بين أوراقك وأوراق الخصم المقلوبة">
+        <i class="ph ph-arrows-clockwise"></i>
+        <span>تبديل المنظور (الخصم/أنت)</span>
+      </button>
+      <a href="library.html" class="arena-btn">
+        <i class="ph ph-door"></i> مغادرة
+      </a>
+    </div>
+  </header>
+
+  <!-- Arena Container -->
+  <main class="online-arena-container">
+
+    <!-- 1. OPPONENT STATUS BAR (Top Player / الخصم) -->
+    <div class="player-status-bar opponent-bar">
+      <div class="player-info-side">
+        <div class="player-avatar-wrapper">
+          <img id="opp-avatar" src="https://api.dicebear.com/9.x/adventurer/svg?seed=Kaiba" alt="Opponent" class="player-avatar">
+          <span class="online-dot"></span>
+        </div>
+        <div class="player-details-text">
+          <div class="player-name-title">
+            <span id="opp-name">سيتو كايبا</span>
+            <span class="player-tag-badge opp">الخصم (P2)</span>
+          </div>
+          <div class="player-deck-stats">
+            <span><i class="ph ph-cards"></i> المجموعة: <strong id="opp-deck-count">45</strong></span>
+            <span><i class="ph ph-skull"></i> المقبرة: <strong id="opp-grave-count">0</strong></span>
+            <span><i class="ph ph-hand"></i> اليد: <strong id="opp-hand-count">5</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Opponent Life Points -->
+      <div class="lp-display-box">
+        <span class="lp-title"><i class="ph ph-heartbeat"></i> LP</span>
+        <span id="opp-lp-value" class="lp-value">8000</span>
+        <div class="lp-quick-controls">
+          <button class="lp-qbtn minus" id="opp-lp-minus-500">-500</button>
+          <button class="lp-qbtn minus" id="opp-lp-minus-1000">-1000</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. DUELING FIELD MATRIX -->
+    <div class="arena-field-grid">
+
+      <!-- A. OPPONENT HAND TRAY (Face Down Cards by default for P1 view) -->
+      <div class="hand-container-wrapper">
+        <div class="hand-label-title">
+          <span><i class="ph ph-eye-slash"></i> أوراق الخصم في اليد (مقلوبة بالنسبة لك)</span>
+          <span style="font-size: 0.8rem; opacity: 0.8;" id="opp-hand-status-text">أنت ترى ظهر كروت الخصم فقط</span>
+        </div>
+        <div class="hand-cards-row" id="opp-hand-container">
+          <!-- Opponent Hand Cards (Face Down) -->
+        </div>
+      </div>
+
+      <!-- B. OPPONENT FIELD (Spell/Trap Row & Monster Row) -->
+      <div class="field-side-label">
+        <span>⚔️ ساحة الخصم</span>
+        <span style="font-size: 0.8rem; opacity: 0.8;">المس أي كارت في الساحة لمعاينته أو مهاجمته</span>
+      </div>
+
+      <!-- Opponent Spell / Trap Row (5 Slots + Side Zones) -->
+      <div class="field-row-container">
+        <!-- Side Zone: Opponent Field Spell -->
+        <div class="field-side-zone" id="opp-field-spell-zone">
+          <i class="ph ph-globe zone-label-icon"></i>
+          <span>حقل</span>
+        </div>
+
+        <!-- 5 Spell/Trap Slots -->
+        <div class="field-slots-5" id="opp-spell-zone">
+          <div class="field-slot-box spell-slot" data-owner="opp" data-type="spell" data-index="0"><i class="ph ph-ankh slot-placeholder-icon"></i></div>
+          <div class="field-slot-box spell-slot" data-owner="opp" data-type="spell" data-index="1"><i class="ph ph-ankh slot-placeholder-icon"></i></div>
+          <div class="field-slot-box spell-slot" data-owner="opp" data-type="spell" data-index="2"><i class="ph ph-ankh slot-placeholder-icon"></i></div>
+          <div class="field-slot-box spell-slot" data-owner="opp" data-type="spell" data-index="3"><i class="ph ph-ankh slot-placeholder-icon"></i></div>
+          <div class="field-slot-box spell-slot" data-owner="opp" data-type="spell" data-index="4"><i class="ph ph-ankh slot-placeholder-icon"></i></div>
+        </div>
+
+        <!-- Side Zone: Opponent Graveyard & Deck -->
+        <div class="field-side-zone" id="opp-grave-zone">
+          <i class="ph ph-skull zone-label-icon"></i>
+          <span>المقبرة</span>
+        </div>
+      </div>
+
+      <!-- Opponent Monster Row (5 Slots) -->
+      <div class="field-row-container">
+        <!-- Side Zone: Extra Deck -->
+        <div class="field-side-zone" id="opp-extra-zone">
+          <i class="ph ph-sparkle zone-label-icon"></i>
+          <span>إضافية</span>
+        </div>
+
+        <div class="field-slots-5" id="opp-monster-zone">
+          <div class="field-slot-box monster-slot" data-owner="opp" data-type="monster" data-index="0"><i class="ph ph-sword slot-placeholder-icon"></i></div>
+          <div class="field-slot-box monster-slot" data-owner="opp" data-type="monster" data-index="1"><i class="ph ph-sword slot-placeholder-icon"></i></div>
+          <div class="field-slot-box monster-slot" data-owner="opp" data-type="monster" data-index="2"><i class="ph ph-sword slot-placeholder-icon"></i></div>
+          <div class="field-slot-box monster-slot" data-owner="opp" data-type="monster" data-index="3"><i class="ph ph-sword slot-placeholder-icon"></i></div>
+          <div class="field-slot-box monster-slot" data-owner="opp" data-type="monster" data-index="4"><i class="ph ph-sword slot-placeholder-icon"></i></div>
+        </div>
+
+        <!-- Side Zone: Deck Stack -->
+        <div class="field-side-zone" id="opp-deck-zone">
+          <i class="ph ph-cards zone-label-icon"></i>
+          <span>المجموعة</span>
+        </div>
+      </div>
+
+      <!-- C. CENTER BATTLE BAR & QUICK ACTIONS -->
+      <div class="center-battle-bar">
+        <div class="turn-status-banner your-turn" id="turn-banner">
+          <i class="ph ph-lightning"></i>
+          <span id="turn-text">دورك الآن (Your Turn)</span>
+        </div>
+
+        <div class="center-quick-actions">
+          <button id="btn-draw-card" class="quick-action-btn"><i class="ph ph-plus-circle"></i> سحب كارت</button>
+          <button id="btn-end-turn" class="quick-action-btn secondary"><i class="ph ph-arrow-right"></i> إنهاء الدور</button>
+          <button id="btn-dice-roll" class="quick-action-btn secondary" title="رمي النرد"><i class="ph ph-dice-five"></i> 🎲</button>
+          <button id="btn-coin-flip" class="quick-action-btn secondary" title="قرعة الكوين"><i class="ph ph-coin"></i> 🪙</button>
+        </div>
+      </div>
+
+      <!-- D. LOCAL PLAYER FIELD (Monster Row & Spell/Trap Row) -->
+      <div class="field-row-container">
+        <!-- Side Zone: Player Extra Deck -->
+        <div class="field-side-zone" id="you-extra-zone">
+          <i class="ph ph-sparkle zone-label-icon"></i>
+          <span>إضافية</span>
+        </div>
+
+        <!-- Player Monster Zone (5 Slots) -->
+        <div class="field-slots-5" id="you-monster-zone">
+          <div class="field-slot-box monster-slot" data-owner="you" data-type="monster" data-index="0"><i class="ph ph-sword slot-placeholder-icon"></i></div>
+          <div class="field-slot-box monster-slot" data-owner="you" data-type="monster" data-index="1"><i class="ph ph-sword slot-placeholder-icon"></i></div>
+          <div class="field-slot-box monster-slot" data-owner="you" data-type="monster" data-index="2"><i class="ph ph-sword slot-placeholder-icon"></i></div>
+          <div class="field-slot-box monster-slot" data-owner="you" data-type="monster" data-index="3"><i class="ph ph-sword slot-placeholder-icon"></i></div>
+          <div class="field-slot-box monster-slot" data-owner="you" data-type="monster" data-index="4"><i class="ph ph-sword slot-placeholder-icon"></i></div>
+        </div>
+
+        <!-- Side Zone: Player Deck -->
+        <div class="field-side-zone" id="you-deck-zone">
+          <i class="ph ph-cards zone-label-icon"></i>
+          <span>المجموعة (<span id="you-deck-count-num">55</span>)</span>
+        </div>
+      </div>
+
+      <!-- Player Spell/Trap Row -->
+      <div class="field-row-container">
+        <!-- Side Zone: Field Spell -->
+        <div class="field-side-zone" id="you-field-spell-zone">
+          <i class="ph ph-globe zone-label-icon"></i>
+          <span>حقل</span>
+        </div>
+
+        <!-- Player Spell/Trap Zone (5 Slots) -->
+        <div class="field-slots-5" id="you-spell-zone">
+          <div class="field-slot-box spell-slot" data-owner="you" data-type="spell" data-index="0"><i class="ph ph-ankh slot-placeholder-icon"></i></div>
+          <div class="field-slot-box spell-slot" data-owner="you" data-type="spell" data-index="1"><i class="ph ph-ankh slot-placeholder-icon"></i></div>
+          <div class="field-slot-box spell-slot" data-owner="you" data-type="spell" data-index="2"><i class="ph ph-ankh slot-placeholder-icon"></i></div>
+          <div class="field-slot-box spell-slot" data-owner="you" data-type="spell" data-index="3"><i class="ph ph-ankh slot-placeholder-icon"></i></div>
+          <div class="field-slot-box spell-slot" data-owner="you" data-type="spell" data-index="4"><i class="ph ph-ankh slot-placeholder-icon"></i></div>
+        </div>
+
+        <!-- Side Zone: Player Graveyard -->
+        <div class="field-side-zone" id="you-grave-zone">
+          <i class="ph ph-skull zone-label-icon"></i>
+          <span>المقبرة (<span id="you-grave-count-num">0</span>)</span>
+        </div>
+      </div>
+
+      <!-- E. LOCAL PLAYER HAND TRAY (Face Up Cards) -->
+      <div class="hand-container-wrapper">
+        <div class="hand-label-title">
+          <span><i class="ph ph-hand"></i> أوراقك في اليد (ظاهرة لك فقط)</span>
+          <span style="font-size: 0.8rem; color: var(--gold-bright);"><i class="ph ph-info"></i> اضغط على أي كارت للاستدعاء أو التفعيل</span>
+        </div>
+        <div class="hand-cards-row" id="you-hand-container">
+          <!-- Player Hand Cards (Face Up) -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 3. LOCAL PLAYER STATUS BAR (Bottom Player / أنت) -->
+    <div class="player-status-bar local-bar">
+      <div class="player-info-side">
+        <div class="player-avatar-wrapper">
+          <img id="you-avatar" src="https://api.dicebear.com/9.x/adventurer/svg?seed=Yugi" alt="You" class="player-avatar">
+          <span class="online-dot"></span>
+        </div>
+        <div class="player-details-text">
+          <div class="player-name-title">
+            <span id="you-name">يوجي موتو</span>
+            <span class="player-tag-badge you">أنت (P1)</span>
+          </div>
+          <div class="player-deck-stats">
+            <span><i class="ph ph-cards"></i> المجموعة: <strong id="you-deck-count">55</strong></span>
+            <span><i class="ph ph-skull"></i> المقبرة: <strong id="you-grave-count">0</strong></span>
+            <span><i class="ph ph-hand"></i> اليد: <strong id="you-hand-count">5</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Local Player Life Points -->
+      <div class="lp-display-box">
+        <span class="lp-title"><i class="ph ph-heartbeat"></i> LP</span>
+        <span id="you-lp-value" class="lp-value">8000</span>
+        <div class="lp-quick-controls">
+          <button class="lp-qbtn minus" id="you-lp-minus-500">-500</button>
+          <button class="lp-qbtn minus" id="you-lp-minus-1000">-1000</button>
+          <button class="lp-qbtn" id="you-lp-plus-500" style="color:#6ee7b7; border-color:#10b981;">+500</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. ACTION LOG BOX -->
+    <div class="action-log-box" id="action-log-box">
+      <div class="log-entry">
+        <span class="time">[12:00]</span>
+        <span>⚔️ تبدأ المبارزة أونلاين بين <strong>يوجي موتو (P1)</strong> و <strong>سيتو كايبا (P2)</strong> بـ 8000 نقاط حياة.</span>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Context Action Menu for Hand / Field Cards -->
+  <div id="online-context-menu" class="context-menu" style="display: none; position: fixed; z-index: 9999;">
+    <button id="ctx-view-details"><i class="ph ph-magnifying-glass"></i> معاينة التفاصيل</button>
+    <button id="ctx-summon-atk"><i class="ph ph-sword"></i> استدعاء هجوم (ظاهر)</button>
+    <button id="ctx-summon-def"><i class="ph ph-shield"></i> استدعاء دفاع (مقلوب 🔒)</button>
+    <button id="ctx-activate-spell"><i class="ph ph-lightning"></i> تفعيل السحر/الفخ</button>
+    <button id="ctx-set-spell"><i class="ph ph-cards"></i> تعيين مقلوب 🔒</button>
+    <button id="ctx-change-position"><i class="ph ph-arrows-down-up"></i> تغيير وضع الكارت (هجوم/دفاع)</button>
+    <button id="ctx-flip-card"><i class="ph ph-eye"></i> كشف الكارت / قلب (Flip)</button>
+    <button id="ctx-attack-monster"><i class="ph ph-sword"></i> هجوم على وحش الخصم ⚔️</button>
+    <button id="ctx-attack-direct"><i class="ph ph-target"></i> هجوم مباشر على الخصم!</button>
+    <button id="ctx-send-grave" class="danger-btn"><i class="ph ph-skull"></i> إلى المقبرة</button>
+  </div>
+
+  <!-- Card Details Modal -->
+  <div id="card-details-modal" class="arena-modal-overlay" style="display: none;">
+    <div class="arena-modal-content">
+      <div class="arena-modal-header">
+        <h3 class="arena-modal-title"><i class="ph ph-cards"></i> تفاصيل البطاقات</h3>
+        <button id="close-card-details-btn" class="arena-modal-close">&times;</button>
+      </div>
+      <div id="card-details-body" style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+        <!-- Card Image & Info injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Battle Target Selection Modal -->
+  <div id="attack-target-modal" class="arena-modal-overlay" style="display: none;">
+    <div class="arena-modal-content">
+      <div class="arena-modal-header">
+        <h3 class="arena-modal-title"><i class="ph ph-crosshair"></i> اختر وحش الخصم المستهدف</h3>
+        <button id="close-target-modal-btn" class="arena-modal-close">&times;</button>
+      </div>
+      <p style="font-size:0.9rem; color:var(--text-cream); margin-top:0;">اختر الوحش الذي تريد الهجوم عليه لحساب معركة الهجوم والدفاع:</p>
+      <div id="target-monsters-list" class="target-select-list">
+        <!-- Target monsters rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Pile Viewer Modal (Deck / Graveyard Inspector) -->
+  <div id="pile-viewer-modal" class="arena-modal-overlay" style="display: none;">
+    <div class="arena-modal-content" style="max-width: 700px; max-height: 85vh; display: flex; flex-direction: column;">
+      <div class="arena-modal-header">
+        <h3 id="pile-viewer-title" class="arena-modal-title"><i class="ph ph-cards"></i> أوراق القائمة</h3>
+        <button id="close-pile-modal-btn" class="arena-modal-close">&times;</button>
+      </div>
+      <div id="pile-viewer-body" class="target-select-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; overflow-y: auto; padding: 10px 5px; max-height: 60vh;">
+        <!-- Pile cards rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Tribute Selection Modal (Summoning Level 6+ Monsters) -->
+  <div id="tribute-select-modal" class="arena-modal-overlay" style="display: none;">
+    <div class="arena-modal-content" style="max-width: 550px;">
+      <div class="arena-modal-header">
+        <h3 id="tribute-modal-title" class="arena-modal-title"><i class="ph ph-fire"></i> اختيار التضحية للاستدعاء</h3>
+        <button id="close-tribute-modal-btn" class="arena-modal-close">&times;</button>
+      </div>
+      <p id="tribute-modal-desc" style="font-size:0.9rem; color:var(--gold-bright); margin-top:0;">اختر الوحوش المراد التضحية بها وإرسالها للمقبرة:</p>
+      <div id="tribute-monsters-list" class="target-select-list" style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
+        <!-- Available tribute monsters -->
+      </div>
+      <div style="text-align: center; margin-top: 15px;">
+        <button id="confirm-tribute-btn" class="quick-action-btn" style="background: linear-gradient(135deg, #ef4444, #991b1b); font-size: 1rem; padding: 10px 24px;">🔥 تأكيد التضحية والإستدعاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Online Room Lobby Modal (غرفة الانتظار والاستعداد) -->
+  <div id="lobby-modal" class="arena-modal-overlay" style="display: flex; z-index: 9999; background: rgba(5, 7, 15, 0.92); backdrop-filter: blur(10px);">
+    <div class="arena-modal-content" style="max-width: 650px; width: 92%; border: 2px solid var(--gold-primary); background: linear-gradient(145deg, #121829, #0a0d18); box-shadow: 0 0 35px rgba(212, 175, 55, 0.25);">
+      
+      <!-- Lobby Header -->
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div style="font-size: 2.2rem; color: var(--gold-bright); margin-bottom: 5px;"><i class="ph ph-swords"></i></div>
+        <h2 style="font-size: 1.6rem; color: #fff; margin: 0; font-family: 'Playfair Display', serif;">غرفة المبارزة أونلاين</h2>
+        <p style="color: var(--text-cream); font-size: 0.9rem; margin-top: 6px;">انسخ رابط الغرفة وأرسله لصديقك للانضمام، ثم اضغطا على زر الاستعداد لبدء المبارزة.</p>
+      </div>
+
+      <!-- Room Share Link Box -->
+      <div style="background: rgba(0,0,0,0.4); border: 1px dashed var(--gold-primary); border-radius: 10px; padding: 12px 16px; margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #93c5fd; font-family: monospace; font-size: 0.95rem; direction: ltr; text-align: left;" id="lobby-room-url">
+          https://.../online-game.html?room=ONLINE-8821
+        </div>
+        <button id="lobby-copy-link-btn" class="quick-action-btn" style="background: linear-gradient(135deg, var(--gold-primary), #b8860b); color: #000; font-weight: bold; white-space: nowrap; padding: 8px 16px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px; border: none;">
+          <i class="ph ph-copy" style="font-size: 1.1rem;"></i> نسخ الرابط
+        </button>
+      </div>
+
+      <!-- Players Cards Grid (P1 vs P2) -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+        
+        <!-- Player 1 Box -->
+        <div id="lobby-p1-card" style="background: rgba(255,255,255,0.04); border: 2px solid rgba(255,215,0,0.3); border-radius: 12px; padding: 16px; text-align: center; position: relative;">
+          <span style="position: absolute; top: 10px; right: 10px; background: rgba(212,175,55,0.2); color: var(--gold-bright); font-size: 0.75rem; padding: 2px 8px; border-radius: 10px;">مباري (P1)</span>
+          <img id="lobby-p1-avatar" src="https://api.dicebear.com/9.x/adventurer/svg?seed=P1" style="width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--gold-primary); margin-bottom: 10px; object-fit: cover;">
+          <h4 id="lobby-p1-name" style="margin: 0; color: #fff; font-size: 1.1rem;">متبارز 1</h4>
+          <div id="lobby-p1-status" style="margin-top: 10px; font-weight: bold; font-size: 0.88rem; color: #ef4444;">
+            <i class="ph ph-x-circle"></i> غير مستعد
+          </div>
+        </div>
+
+        <!-- Player 2 Box -->
+        <div id="lobby-p2-card" style="background: rgba(255,255,255,0.04); border: 2px solid rgba(255,215,0,0.15); border-radius: 12px; padding: 16px; text-align: center; position: relative;">
+          <span style="position: absolute; top: 10px; right: 10px; background: rgba(147,197,253,0.2); color: #93c5fd; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px;">منافس (P2)</span>
+          <img id="lobby-p2-avatar" src="https://api.dicebear.com/9.x/adventurer/svg?seed=Waiting" style="width: 70px; height: 70px; border-radius: 50%; border: 2px dashed rgba(255,255,255,0.3); margin-bottom: 10px; opacity: 0.6; object-fit: cover;">
+          <h4 id="lobby-p2-name" style="margin: 0; color: #a1a1aa; font-size: 1rem; font-style: italic;">في انتظار الصديق...</h4>
+          <div id="lobby-p2-status" style="margin-top: 10px; font-weight: bold; font-size: 0.88rem; color: #eab308;">
+            <i class="ph ph-hourglass-high"></i> لم ينضم بعد
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Nickname Edit (If Guest or wants to change display name) -->
+      <div style="margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 10px 14px; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
+        <label for="lobby-nickname-input" style="color: var(--text-cream); font-size: 0.88rem; white-space: nowrap;"><i class="ph ph-user-pencil"></i> اسمك في الغرفة:</label>
+        <input type="text" id="lobby-nickname-input" placeholder="أدخل اسمك هنا..." style="flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 0.9rem;">
+        <button id="save-nickname-btn" style="background: rgba(255,215,0,0.2); color: var(--gold-bright); border: 1px solid var(--gold-primary); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">حفظ</button>
+      </div>
+
+      <!-- Ready Button & Notice -->
+      <div style="text-align: center;">
+        <button id="lobby-ready-btn" class="quick-action-btn" style="background: linear-gradient(135deg, #22c55e, #15803d); font-size: 1.15rem; padding: 12px 36px; border-radius: 8px; color: #fff; font-weight: bold; width: 100%; box-shadow: 0 4px 15px rgba(34,197,94,0.3); cursor: pointer; transition: all 0.2s;" disabled>
+          <i class="ph ph-check-circle"></i> أنا مستعد (Ready)
+        </button>
+        <p id="lobby-status-notice" style="color: #eab308; font-size: 0.85rem; margin-top: 10px; margin-bottom: 0;">
+          <i class="ph ph-info"></i> ارسل الرابط لصديقك للانضمام، وسوف يفعل زر الاستعداد تلقائياً عند دخوله.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Countdown Overlay -->
+  <div id="duel-countdown-modal" class="arena-modal-overlay" style="display: none; z-index: 10000; background: rgba(5, 7, 15, 0.95); text-align: center;">
+    <div style="color: #fff;">
+      <div style="font-size: 1.5rem; color: var(--gold-bright); margin-bottom: 10px;">⚔️ تبدأ المبارزة خلال</div>
+      <div id="countdown-num" style="font-size: 5rem; font-weight: bold; color: #22c55e; font-family: 'Playfair Display', serif; text-shadow: 0 0 30px rgba(34,197,94,0.6);">3</div>
+      <div style="font-size: 1.2rem; color: var(--text-cream); margin-top: 10px;">استعد للمواجهة!</div>
+    </div>
+  </div>
+
+  <script type="module" src="js/firebase-config.js"></script>
+  <script type="module" src="js/online-game.js"></script>
+</body>
+</html>
