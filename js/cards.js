@@ -1,5 +1,6 @@
 import { ref as dbRef, get as dbGet, set as dbSet, remove as dbRemove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { setupCardPreview } from "./card-preview.js";
+import { getCardDetailsAr } from "./card-translator.js";
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { ref, onValue, set, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -397,10 +398,12 @@ function renderCards(cardsToRender) {
     cardEl.dataset.id = card.id;
     
     // Type class
+    const details = getCardDetailsAr(card);
     let typeClass = '';
-    if (card.type === 'Monster') typeClass = 'type-monster';
-    else if (card.type === 'Spell') typeClass = 'type-spell';
-    else if (card.type === 'Trap') typeClass = 'type-trap';
+    const rawType = (card.type || '').toLowerCase();
+    if (rawType.includes('monster') || rawType.includes('وحش')) typeClass = 'type-monster';
+    else if (rawType.includes('spell') || rawType.includes('سحر')) typeClass = 'type-spell';
+    else if (rawType.includes('trap') || rawType.includes('فخ')) typeClass = 'type-trap';
     
     let imageUrl = card.imageUrl || 'https://via.placeholder.com/220x320?text=No+Image';
     setupCardPreview(cardEl, card);
@@ -408,10 +411,10 @@ function renderCards(cardsToRender) {
       <button class="card-fav-btn" data-id="${card.id}" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); border: 1px solid var(--gold-primary); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; z-index: 5;">
         <i class="ph ph-heart"></i>
       </button>
-      <img src="${imageUrl}" alt="${card.name}" class="card-image" loading="lazy">
+      <img src="${imageUrl}" alt="${details.nameAr}" class="card-image" loading="lazy">
       <div class="card-content">
-        <h3 class="card-name english-text">${card.name}</h3>
-        <span class="card-type ${typeClass}">${card.type || 'Unknown'}</span>
+        <h3 class="card-name arabic-text">${details.nameAr}</h3>
+        <span class="card-type ${typeClass}">${details.typeAr}</span>
       </div>
     `;
     

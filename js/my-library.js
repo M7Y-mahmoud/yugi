@@ -1,4 +1,5 @@
 import { setupCardPreview } from "./card-preview.js";
+import { getCardDetailsAr } from "./card-translator.js";
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { ref, onValue, remove, set, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -174,14 +175,15 @@ function renderEditCards() {
   currentEditingDeckCards.forEach((cardId, index) => {
     const cardData = allCardsData[cardId];
     if (cardData) {
+      const details = getCardDetailsAr(cardData);
       const wrapper = document.createElement('div');
       wrapper.className = 'edit-card-wrapper';
       
       const img = document.createElement('img');
       img.src = cardData.imageUrl || 'https://via.placeholder.com/220x320?text=No+Image';
-      img.alt = cardData.name;
+      img.alt = details.nameAr;
       img.className = 'edit-card-image';
-      img.title = cardData.name;
+      img.title = details.nameAr;
       
       const menuBtn = document.createElement('button');
       menuBtn.className = 'edit-card-menu-btn hide-desktop';

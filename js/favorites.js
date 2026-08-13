@@ -1,4 +1,5 @@
 import { auth, db } from "./firebase-config.js";
+import { getCardDetailsAr } from "./card-translator.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { ref, get, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
@@ -66,10 +67,12 @@ async function loadFavorites() {
         const cardEl = document.createElement('div');
         cardEl.className = 'card fav-card';
         
+        const details = getCardDetailsAr(cardData);
         let typeClass = '';
-        if (cardData.type === 'Monster') typeClass = 'type-monster';
-        else if (cardData.type === 'Spell') typeClass = 'type-spell';
-        else if (cardData.type === 'Trap') typeClass = 'type-trap';
+        const rawType = (cardData.type || '').toLowerCase();
+        if (rawType.includes('monster') || rawType.includes('وحش')) typeClass = 'type-monster';
+        else if (rawType.includes('spell') || rawType.includes('سحر')) typeClass = 'type-spell';
+        else if (rawType.includes('trap') || rawType.includes('فخ')) typeClass = 'type-trap';
         
         let imageUrl = cardData.imageUrl || 'https://via.placeholder.com/220x320?text=No+Image';
         
@@ -77,10 +80,10 @@ async function loadFavorites() {
           <button class="fav-btn-card" data-id="${cardId}" title="إزالة من المفضلة">
             <i class="ph-fill ph-heart"></i>
           </button>
-          <img src="${imageUrl}" alt="${cardData.name}" class="card-image" loading="lazy">
+          <img src="${imageUrl}" alt="${details.nameAr}" class="card-image" loading="lazy">
           <div class="card-content">
-            <h3 class="card-name english-text">${cardData.name}</h3>
-            <span class="card-type ${typeClass}">${cardData.type || 'Unknown'}</span>
+            <h3 class="card-name arabic-text">${details.nameAr}</h3>
+            <span class="card-type ${typeClass}">${details.typeAr}</span>
           </div>
         `;
         

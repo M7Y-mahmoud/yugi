@@ -1,4 +1,5 @@
 import { setupCardPreview } from "./card-preview.js";
+import { getCardDetailsAr } from "./card-translator.js";
 import { ref, get, set, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { auth, db } from "./firebase-config.js";
 
@@ -617,9 +618,9 @@ function updateUI(isDrawing = false, doSave = true) {
   
   if (graveCountDisplay) graveCountDisplay.textContent = graveyard.length;
   if (graveyardPileVisual) {
-    if (graveyard.length > 0) {
+    if (graveyard.length > 0 && graveyard[0]) {
       graveyardPileVisual.classList.remove('empty');
-      graveyardPileVisual.style.backgroundImage = `url("${graveyard[0].imageUrl || CARD_BACK_URL}")`;
+      graveyardPileVisual.style.backgroundImage = `url("${graveyard[0]?.imageUrl || graveyard[0]?.image || CARD_BACK_URL}")`;
     } else {
       graveyardPileVisual.classList.add('empty');
       graveyardPileVisual.style.backgroundImage = 'none';
@@ -730,9 +731,10 @@ function createFieldCardElement(slotData, zoneType, slotIndex) {
     cardDiv.title = 'كارت مقلوب';
     setupCardPreview(cardDiv, CARD_BACK_URL);
   } else {
-    cardDiv.style.backgroundImage = `url("${card.imageUrl || CARD_BACK_URL}")`;
-    cardDiv.title = card.name;
-    setupCardPreview(cardDiv, card.imageUrl || CARD_BACK_URL);
+    const cardImg = card?.imageUrl || card?.image || CARD_BACK_URL;
+    cardDiv.style.backgroundImage = `url("${cardImg}")`;
+    cardDiv.title = card?.name || 'كارت';
+    setupCardPreview(cardDiv, cardImg);
   }
 
   cardDiv.addEventListener('click', (e) => {
@@ -788,22 +790,30 @@ function positionContextMenu(menu, e) {
 
 function showCardDetails(card) {
   if (!card || !cardDetailsBody || !cardDetailsModal) return;
+  const details = getCardDetailsAr(card);
+  const imgUrl = card?.imageUrl || card?.image || CARD_BACK_URL;
+
   cardDetailsBody.innerHTML = `
-    <img src="${card.imageUrl || CARD_BACK_URL}" alt="${card.name}">
-    <button class="card-fav-btn" data-id="${card.id}" style="position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.7); border: 1px solid var(--gold-primary); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; z-index: 100;">
+    <img src="${imgUrl}" alt="${details.nameAr}">
+    <button class="card-fav-btn" data-id="${card?.id}" style="position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.7); border: 1px solid var(--gold-primary); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; z-index: 100;">
       <i class="ph ph-heart"></i>
     </button>
     <div class="card-details-info">
-      <h3 class="english-text">${card.name}</h3>
-      <p><strong>النوع:</strong> ${card.type || 'غير معروف'}</p>
-      ${card.attribute ? `<p><strong>السمة:</strong> ${card.attribute}</p>` : ''}
-      ${card.level ? `<p><strong>المستوى:</strong> ${card.level}</p>` : ''}
-      ${card.atk !== undefined && card.def !== undefined ? `<p><strong>هجوم / دفاع:</strong> ${card.atk} / ${card.def}</p>` : ''}
-      <p class="card-details-desc">${card.description || 'لا يوجد وصف'}</p>
+      <h3 class="arabic-heading">${details.nameAr}</h3>
+      ${details.nameEn ? `<p style="color: #93c5fd; font-size: 0.85rem;"><strong>الاسم بالإنجليزي:</strong> ${details.nameEn}</p>` : ''}
+      <p><strong>نوع الكارت:</strong> ${details.typeAr}</p>
+      ${details.attributeAr ? `<p><strong>السمة:</strong> ${details.attributeAr}</p>` : ''}
+      ${details.raceAr ? `<p><strong>الفصيلة / الفئة:</strong> ${details.raceAr}</p>` : ''}
+      ${details.level ? `<p><strong>المستوى:</strong> ⭐ ${details.level}</p>` : ''}
+      ${details.atk !== undefined && details.def !== undefined ? `<p><strong>⚔️ الهجوم / 🛡️ الدفاع:</strong> ${details.atk} / ${details.def}</p>` : ''}
+      <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.4); border-radius: 8px; border: 1px solid rgba(255,215,0,0.15);">
+        <strong style="color: var(--gold-bright); display: block; margin-bottom: 4px;">تأثير / وصف البطاقة:</strong>
+        <p class="card-details-desc" style="margin: 0; line-height: 1.6;">${details.descAr}</p>
+      </div>
     </div>
   `;
   cardDetailsModal.style.display = 'flex';
-  if (typeof updateGameFavButton === 'function') updateGameFavButton(card.id);
+  if (typeof updateGameFavButton === 'function' && card?.id) updateGameFavButton(card.id);
 }
 
 function renderGraveyardPopover() {
@@ -816,12 +826,13 @@ function renderGraveyardPopover() {
   
   graveyard.forEach((card, index) => {
     if (!card) return;
+    const imgUrl = card?.imageUrl || card?.image || CARD_BACK_URL;
     const cardDiv = document.createElement('div');
-    cardDiv.style.backgroundImage = `url("${card.imageUrl || CARD_BACK_URL}")`;
+    cardDiv.style.backgroundImage = `url("${imgUrl}")`;
     cardDiv.style.backgroundSize = 'cover';
     cardDiv.style.backgroundPosition = 'center';
     cardDiv.className = 'grave-item';
-    cardDiv.title = card.name;
+    cardDiv.title = card?.name || '';
     
     cardDiv.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -829,7 +840,7 @@ function renderGraveyardPopover() {
       positionContextMenu(graveContextMenu, e);
     });
     
-    setupCardPreview(cardDiv, card.imageUrl || CARD_BACK_URL);
+    setupCardPreview(cardDiv, imgUrl);
     graveyardList.appendChild(cardDiv);
   });
 }
@@ -844,12 +855,13 @@ function renderDeckPopover() {
   
   deckPile.forEach((card, index) => {
     if (!card) return;
+    const imgUrl = card?.imageUrl || card?.image || CARD_BACK_URL;
     const cardDiv = document.createElement('div');
-    cardDiv.style.backgroundImage = `url("${card.imageUrl || CARD_BACK_URL}")`;
+    cardDiv.style.backgroundImage = `url("${imgUrl}")`;
     cardDiv.style.backgroundSize = 'cover';
     cardDiv.style.backgroundPosition = 'center';
     cardDiv.className = 'grave-item';
-    cardDiv.title = card.name;
+    cardDiv.title = card?.name || '';
     
     cardDiv.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -857,7 +869,7 @@ function renderDeckPopover() {
       positionContextMenu(deckContextMenu, e);
     });
     
-    setupCardPreview(cardDiv, card.imageUrl || CARD_BACK_URL);
+    setupCardPreview(cardDiv, imgUrl);
     deckList.appendChild(cardDiv);
   });
 }
