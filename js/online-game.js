@@ -584,6 +584,25 @@ function setupPileClickListeners() {
 }
 
 function setupLPButtons() {
+  document.getElementById('opp-lp-minus-500')?.addEventListener('click', () => {
+    const oppState = (localPlayerRole === 'P1') ? p2State : p1State;
+    oppState.lp = Math.max(0, oppState.lp - 500);
+    logAction(`💥 خصم 500 LP من ${oppState.name}!`);
+    renderArena();
+    pushGameStateToFirebase();
+    checkWinConditions();
+  });
+
+  document.getElementById('opp-lp-minus-1000')?.addEventListener('click', () => {
+    const oppState = (localPlayerRole === 'P1') ? p2State : p1State;
+    oppState.lp = Math.max(0, oppState.lp - 1000);
+    logAction(`💥 خصم 1000 LP من ${oppState.name}!`);
+    renderArena();
+    pushGameStateToFirebase();
+    checkWinConditions();
+  });
+
+
   document.getElementById('you-lp-minus-500')?.addEventListener('click', () => {
     const myState = (localPlayerRole === 'P1') ? p1State : p2State;
     myState.lp = Math.max(0, myState.lp - 500);
